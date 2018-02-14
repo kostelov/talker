@@ -8,7 +8,6 @@
 -a <addr> - IP-адрес для прослушивания (по умолчанию слушает все доступные адреса)
 """
 
-import sys
 from socket import *
 from jim.event import get_message, send_message
 
@@ -21,6 +20,7 @@ def presence_response(msg):
 
 
 if __name__ == '__main__':
+    import sys
     sock = socket()
     try:
         addr = sys.argv[1]

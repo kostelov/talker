@@ -9,7 +9,6 @@ def dict_to_byte(dict_message):
     :return: кодированное сообщение
 >>> dict_to_byte({'test': 'test'})
 b'{"test": "test"}'
-
     '''
     if isinstance(dict_message, dict):
         json_message = json.dumps(dict_message)
@@ -26,8 +25,7 @@ def byte_to_dict(byte_message):
     :return: словарь
 >>> byte_to_dict(b'{"test": "test"}')
 {'test': 'test'}
-
-    '''
+'''
     if isinstance(byte_message, bytes):
         json_message = byte_message.decode(ENCODING)
         message = json.loads(json_message)

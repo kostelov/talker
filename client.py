@@ -1,4 +1,3 @@
-import sys
 import time
 from socket import *
 from jim.event import send_message, get_message
@@ -13,7 +12,16 @@ message = {
     }
 }
 
+
+def response(msg):
+    if 'response' in msg and msg['response'] == 200:
+        return 'OK'
+    elif 'response' in msg and msg['response'] == 400:
+        return msg['error']
+
+
 if __name__ == '__main__':
+    import sys
     sock = socket()
     try:
         addr = sys.argv[1]
@@ -29,5 +37,6 @@ if __name__ == '__main__':
 
     sock.connect((addr, port))
     send_message(sock, message)
-    print(get_message(sock))
+    rmessage = get_message(sock)
+    print(response(rmessage))
     sock.close()
