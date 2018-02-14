@@ -16,7 +16,7 @@ def presence_response(msg):
     if 'action' in msg and msg['action'] == 'presence' and 'time' in msg and isinstance(msg['time'], float):
         return {'response': 200}
     else:
-        return {'response': 400, 'error': 'неверный формат запроса'}
+        return {'response': 400, 'error': 'не верный запрос'}
 
 
 if __name__ == '__main__':
