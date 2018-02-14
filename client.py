@@ -1,15 +1,15 @@
 import sys
 import time
 from socket import *
-from jim.event import send_message
+from jim.event import send_message, get_message
 
 message = {
     'action': 'presence',
     'time': time.time(),
     'type': 'status',
     'user': {
-        'account_name': 'Nick',
-        'status': 'В сети'
+        'account_name': 'name',
+        'status': 'online'
     }
 }
 
@@ -29,4 +29,5 @@ if __name__ == '__main__':
 
     sock.connect((addr, port))
     send_message(sock, message)
+    print(get_message(sock))
     sock.close()

@@ -10,7 +10,14 @@
 
 import sys
 from socket import *
-from jim.event import get_message
+from jim.event import get_message, send_message
+
+
+def presence_response(msg):
+    if 'action' in msg and msg['action'] == 'presence' and 'time' in msg and isinstance(msg['time'], float):
+        return {'response': 200}
+    else:
+        return {'response': 400, 'error': 'неверный формат запроса'}
 
 
 if __name__ == '__main__':
@@ -35,4 +42,6 @@ if __name__ == '__main__':
         print("Получен запрос на соединение от {}".format(adr))
         message = get_message(conn)
         print(message)
+        response = presence_response(message)
+        send_message(conn, response)
         conn.close()
