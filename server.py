@@ -12,7 +12,12 @@ from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import get_message, send_message
 
 
-def presence_response(msg):
+def make_response(msg):
+    '''
+    Обработка полученного запроса клиента и формирование ответа
+    :param msg: запрос (словарь)
+    :return: ответ сервера (словарь)
+    '''
     if 'action' in msg and msg['action'] == 'presence' and 'time' in msg and isinstance(msg['time'], float):
         return {'response': 200}
     else:
@@ -23,17 +28,35 @@ def request(r_clients, all_clients):
     Чтение запросов из списка клиентов
     :param r_clients:
     :param all_clients:
-    :return:
+    :return: Словарь ответов сервера вида {сокет: запрос}
     '''
-    # Словарь ответов сервера вида {сокет: запрос}
-    response = {}
+    requests = {}
     for sock in r_clients:
         try:
-            response[sock] = get_message(sock)
+            requests[sock] = get_message(sock)
         except:
             print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
             all_clients.remove(sock)
-    return response
+    return requests
+
+
+def response(requests, w_clients, all_clients):
+    '''
+    Эхо-ответ сервера клиентам, от которых были запросы
+    :param requests: {сокет: запрос}
+    :param w_clients: список клиентов, которые ожидают ответа
+    :param all_clientts: список всех клиентов
+    :return:
+    '''
+    for sock in w_clients:
+        if sock in requests:
+            try:
+                send_message(sock, make_response(requests[sock]))
+            except:
+                # Сокет недоступен, клиент отключился
+                print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+                sock.close()
+                all_clients.remove(sock)
 
 
 def mainloop(address, port):
@@ -51,7 +74,7 @@ def mainloop(address, port):
     sock.listen(5)
     # Таймаут для операций с сокетом
     sock.settimeout(0.2)
-    print('Эхо-сервер запущен!')
+    print('Эхо-сервер запущен...')
     while True:
         try:
             conn, adr = sock.accept()
@@ -77,8 +100,7 @@ def mainloop(address, port):
                 pass
 
             requests = request(r, clients)
-            print(requests)
-            # response(requests, w, clients)
+            response(requests, w, clients)
             # message = get_message(conn)
             # print(message)
             # response = presence_response(message)
