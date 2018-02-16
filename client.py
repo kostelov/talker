@@ -37,6 +37,6 @@ if __name__ == '__main__':
 
     sock.connect((addr, port))
     send_message(sock, message)
-    rmessage = get_message(sock)
-    print(response(rmessage))
+    # rmessage = get_message(sock)
+    # print(response(rmessage))
     sock.close()
