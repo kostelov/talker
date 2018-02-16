@@ -1,5 +1,5 @@
 from pytest import raises
-from .event import dict_to_byte, byte_to_dict
+from event import dict_to_byte, byte_to_dict
 
 
 def test_dict_to_byte():
