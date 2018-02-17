@@ -1,6 +1,10 @@
 import time
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import send_message, get_message
+import logging
+import client_log_config
+
+log = logging.getLogger('client')
 
 message = {
     'action': 'presence',
@@ -17,6 +21,7 @@ def response(msg):
     if 'response' in msg and msg['response'] == 200:
         return 'OK'
     elif 'response' in msg and msg['response'] == 400:
+        log.error('Ошибка {}. Неверный запрос'.format(msg['response']))
         return msg['error']
 
 
@@ -36,7 +41,6 @@ if __name__ == '__main__':
         addr = sys.argv[1]
     except IndexError:
         addr = 'localhost'
-
     try:
         port = int(sys.argv[2])
     except IndexError:
