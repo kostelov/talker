@@ -12,10 +12,25 @@ from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import get_message, send_message
 import logging
 import server_log_config
+import os
 
-log = logging.getLogger('server')
+logger = logging.getLogger('server')
 
 
+def log(func):
+    def wrap(*args, **kwargs):
+        result = func(*args, **kwargs)
+        logger.info('функция: {}|модуль: {}|инфо: {}'.format(func.__name__, os.path.basename(__file__), result))
+        return result
+    return wrap
+
+
+@log
+def add_to_log(args):
+    return args
+
+
+@log
 def make_response(msg):
     """
     Обработка полученного запроса клиента и формирование ответа
@@ -25,10 +40,10 @@ def make_response(msg):
     if 'action' in msg and msg['action'] == 'presence' and 'time' in msg and isinstance(msg['time'], float):
         return {'response': 200}
     else:
-        log.error('Ошибка 400. Неверный запрос от клиента')
         return {'response': 400, 'error': 'не верный запрос'}
 
 
+@log
 def request(r_clients, all_clients):
     """
     Чтение запросов из списка клиентов
@@ -41,12 +56,13 @@ def request(r_clients, all_clients):
         try:
             requests[sock] = get_message(sock)
         except:
+            add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
             print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-            log.info('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
             all_clients.remove(sock)
     return requests
 
 
+@log
 def response(requests, w_clients, all_clients):
     """
     Эхо-ответ сервера клиентам, от которых были запросы
@@ -61,8 +77,8 @@ def response(requests, w_clients, all_clients):
                 send_message(sock, make_response(requests[sock]))
             except:
                 # Сокет недоступен, клиент отключился
+                add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
                 print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-                log.info('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
                 sock.close()
                 all_clients.remove(sock)
 
@@ -82,8 +98,8 @@ def start(address, port):
         sock.listen(5)
         # Таймаут для операций с сокетом
         sock.settimeout(0.2)
+        add_to_log('Эхо-сервер запущен...')
         print('Эхо-сервер запущен...')
-        log.info('Эхо-сервер запущен...')
         while True:
             try:
                 conn, adr = sock.accept()
@@ -91,8 +107,8 @@ def start(address, port):
                 # Время ожидания вышло
                 pass
             else:
+                add_to_log('Получен запрос на соединение от {}'.format(adr))
                 print('Получен запрос на соединение от {}'.format(adr))
-                log.info('Получен запрос на соединение от {}'.format(adr))
                 # Клиент подключился - добавляем его в список
                 clients.append(conn)
             finally:
@@ -111,11 +127,6 @@ def start(address, port):
 
                 requests = request(r, clients)
                 response(requests, w, clients)
-                # message = get_message(conn)
-                # print(message)
-                # response = presence_response(message)
-                # send_message(conn, response)
-                # conn.close()
 
 
 if __name__ == '__main__':

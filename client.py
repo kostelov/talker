@@ -3,8 +3,9 @@ from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import send_message, get_message
 import logging
 import client_log_config
+import os
 
-log = logging.getLogger('client')
+logger = logging.getLogger('client')
 
 message = {
     'action': 'presence',
@@ -17,11 +18,24 @@ message = {
 }
 
 
+def log(func):
+    def wrap(*args, **kwargs):
+        result = func(*args, **kwargs)
+        logger.info('функция: {}|модуль: {}|инфо: {}'.format(func.__name__, os.path.basename(__file__), result))
+        return result
+    return wrap
+
+
+@log
+def add_to_log(args):
+    return args
+
+
+@log
 def response(msg):
     if 'response' in msg and msg['response'] == 200:
         return 'OK'
     elif 'response' in msg and msg['response'] == 400:
-        log.error('Ошибка {}. Неверный запрос'.format(msg['response']))
         return msg['error']
 
 
