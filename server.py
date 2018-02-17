@@ -59,7 +59,7 @@ def response(requests, w_clients, all_clients):
                 all_clients.remove(sock)
 
 
-def mainloop(address, port):
+def start(address, port):
     '''
     Данные хоста:
     :param address: адрес, на который отправляют запрос клиенты (localhost))
@@ -69,43 +69,43 @@ def mainloop(address, port):
     host = (address, port)
     # Список клментов
     clients = []
-    sock = socket(AF_INET, SOCK_STREAM)
-    sock.bind(host)
-    sock.listen(5)
-    # Таймаут для операций с сокетом
-    sock.settimeout(0.2)
-    print('Эхо-сервер запущен...')
-    while True:
-        try:
-            conn, adr = sock.accept()
-        except OSError as e:
-            # Время ожидания вышло
-            pass
-        else:
-            print("Получен запрос на соединение от {}".format(adr))
-            # Клиент подключился - добавляем его в список
-            clients.append(conn)
-        finally:
-            timeout = 0
-            r = []
-            w = []
+    with socket(AF_INET, SOCK_STREAM) as sock:
+        sock.bind(host)
+        sock.listen(5)
+        # Таймаут для операций с сокетом
+        sock.settimeout(0.2)
+        print('Эхо-сервер запущен...')
+        while True:
             try:
-                # Опрос сокетов, которые подключились
-                # r - сокеты, которые отправляеют сообщения
-                # w - сокеты, которые ожидают ответ
-                # e -  сокеты с ошибкой
-                r, w, e = select(clients, clients, [], timeout)
-            except:
-                # Клиент отключился - ничего не делать
+                conn, adr = sock.accept()
+            except OSError as e:
+                # Время ожидания вышло
                 pass
+            else:
+                print("Получен запрос на соединение от {}".format(adr))
+                # Клиент подключился - добавляем его в список
+                clients.append(conn)
+            finally:
+                timeout = 0
+                r = []
+                w = []
+                try:
+                    # Опрос сокетов, которые подключились
+                    # r - сокеты, которые отправляеют сообщения
+                    # w - сокеты, которые ожидают ответ
+                    # e -  сокеты с ошибкой
+                    r, w, e = select(clients, clients, [], timeout)
+                except:
+                    # Клиент отключился - ничего не делать
+                    pass
 
-            requests = request(r, clients)
-            response(requests, w, clients)
-            # message = get_message(conn)
-            # print(message)
-            # response = presence_response(message)
-            # send_message(conn, response)
-            # conn.close()
+                requests = request(r, clients)
+                response(requests, w, clients)
+                # message = get_message(conn)
+                # print(message)
+                # response = presence_response(message)
+                # send_message(conn, response)
+                # conn.close()
 
 if __name__ == '__main__':
     import sys
@@ -121,4 +121,4 @@ if __name__ == '__main__':
         print('Не верный параметр')
         sys.exit(0)
 
-    mainloop(addr, port)
+    start(addr, port)

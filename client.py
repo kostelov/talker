@@ -1,5 +1,5 @@
 import time
-from socket import *
+from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import send_message, get_message
 
 message = {
@@ -20,9 +20,18 @@ def response(msg):
         return msg['error']
 
 
+def start(address, port):
+    host = (address, port)
+    with socket(AF_INET, SOCK_STREAM) as sock:
+        sock.connect(host)
+        while True:
+            send_message(sock, message)
+            rmessage = get_message(sock)
+            print(response(rmessage))
+
+
 if __name__ == '__main__':
     import sys
-    sock = socket()
     try:
         addr = sys.argv[1]
     except IndexError:
@@ -35,8 +44,4 @@ if __name__ == '__main__':
     except ValueError:
         sys.exit(0)
 
-    sock.connect((addr, port))
-    send_message(sock, message)
-    rmessage = get_message(sock)
-    print(response(rmessage))
-    sock.close()
+    start(addr, port)
