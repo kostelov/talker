@@ -8,12 +8,12 @@ import os
 logger = logging.getLogger('client')
 
 message = {
-    "action": "presence",
-    "time": time.time(),
-    "type": "status",
-    "user": {
-        "account_name": "name",
-        "status": "Занят"
+    'action': 'presence',
+    'time': time.time(),
+    'type': 'status',
+    'user': {
+        'account_name': 'user',
+        'status': 'Занят'
     }
 }
 
@@ -44,10 +44,10 @@ def start(address, port):
     with socket(AF_INET, SOCK_STREAM) as sock:
         sock.connect(host)
         while True:
-            send_message(sock, message)
-            rmessage = get_message(sock)
-            # print(response(rmessage))
-            print(rmessage)
+            # send_message(sock, message)
+            # rmessage = get_message(sock)
+            print(response(get_message(sock)))
+            # print(rmessage)
 
 
 if __name__ == '__main__':

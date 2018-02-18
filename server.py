@@ -73,17 +73,18 @@ def response(requests, w_clients, all_clients):
     :param all_clientts: список всех клиентов
     :return:
     """
-    for sock in w_clients:
-        if sock in requests:
-            try:
-                # send_message(sock, make_response(requests[sock]))
-                send_message(sock, {'response': time.asctime()})
-            except:
-                # Сокет недоступен, клиент отключился
-                add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-                print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-                sock.close()
-                all_clients.remove(sock)
+    for sock in all_clients:
+        for w_sock in w_clients:
+            if sock in requests:
+                try:
+                    send_message(w_sock, make_response(requests[sock]))
+                    # send_message(w_sock, {'response': time.asctime()})
+                except:
+                    # Сокет недоступен, клиент отключился
+                    add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+                    print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+                    sock.close()
+                    all_clients.remove(sock)
 
 
 def start(address, port):

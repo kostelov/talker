@@ -8,12 +8,12 @@ import os
 logger = logging.getLogger('client')
 
 message = {
-    "action": "presence",
-    "time": time.time(),
-    "type": "status",
-    "user": {
-        "account_name": "name",
-        "status": "В сети"
+    'action': 'presence',
+    'time': time.time(),
+    'type': 'status',
+    'user': {
+        'account_name': 'name',
+        'status': 'В сети'
     }
 }
 
@@ -45,10 +45,9 @@ def start(address, port):
         sock.connect(host)
         while True:
             send_message(sock, message)
-            print(message)
-            rmessage = get_message(sock)
-            # print(response(rmessage))
-            print(rmessage)
+            # rmessage = get_message(sock)
+            print(response(get_message(sock)))
+            # print(rmessage)
 
 
 if __name__ == '__main__':
