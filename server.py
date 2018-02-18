@@ -7,6 +7,7 @@
 -p <port> - TCP-порт для работы (по умолчанию использует порт 7777)
 -a <addr> - IP-адрес для прослушивания (по умолчанию слушает все доступные адреса)
 """
+import time
 from select import select
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import get_message, send_message
@@ -37,8 +38,9 @@ def make_response(msg):
     :param msg: запрос (словарь)
     :return: ответ сервера (словарь)
     """
-    if 'action' in msg and msg['action'] == 'presence' and 'time' in msg and isinstance(msg['time'], float):
-        return {'response': 200}
+    if 'action' in msg and msg['action'] == 'presence' and 'time' in msg and isinstance(msg['time'], float) \
+            and 'user' in msg:
+        return {'response': 200, 'message': msg['user']['status']}
     else:
         return {'response': 400, 'error': 'не верный запрос'}
 
@@ -74,7 +76,8 @@ def response(requests, w_clients, all_clients):
     for sock in w_clients:
         if sock in requests:
             try:
-                send_message(sock, make_response(requests[sock]))
+                # send_message(sock, make_response(requests[sock]))
+                send_message(sock, {'response': time.asctime()})
             except:
                 # Сокет недоступен, клиент отключился
                 add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))

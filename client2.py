@@ -13,7 +13,7 @@ message = {
     "type": "status",
     "user": {
         "account_name": "name",
-        "status": "В сети"
+        "status": "Занят"
     }
 }
 
@@ -45,7 +45,6 @@ def start(address, port):
         sock.connect(host)
         while True:
             send_message(sock, message)
-            print(message)
             rmessage = get_message(sock)
             # print(response(rmessage))
             print(rmessage)
