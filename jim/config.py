@@ -1,6 +1,7 @@
 """
 Константы для JIM протокола
 """
+ENCODING = 'utf-8'
 # Ключи
 ACTION = 'action'
 TIME = 'time'

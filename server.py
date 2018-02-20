@@ -12,6 +12,7 @@ import logging
 from select import select
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import get_message, send_message
+from jim.core import Jim, JimResponse
 
 import log.server_log_config
 from log.loger import Log
@@ -32,83 +33,95 @@ logg = Log(logger)
 # def add_to_log(args):
 #     return args
 
+class Handler:
 
-@logg
-def make_response(msg):
-    """
-    Обработка полученного запроса клиента и формирование ответа
-    :param msg: запрос (словарь)
-    :return: ответ сервера (словарь)
-    """
-    if 'action' in msg and msg['action'] == 'presence' and 'time' in msg and isinstance(msg['time'], float) \
-            and 'user' in msg:
-        return {'response': 200, 'message': msg['user']['status']}
-    else:
-        return {'response': 400, 'error': 'не верный запрос'}
-
-
-@logg
-def request(r_clients, all_clients):
-    """
-    Чтение запросов из списка клиентов
-    :param r_clients:
-    :param all_clients:
-    :return: Словарь ответов сервера вида {сокет: запрос}
-    """
-    requests = {}
-    for sock in r_clients:
+    @logg
+    def greet(self, presence_msg):
+        """
+        Выполнить приветствие
+        :param presence_message: запрос (словарь)
+        :return: ответ сервера (словарь)
+        """
         try:
-            requests[sock] = sock.recv(1024).decode('utf-8')# get_message(sock)
-        except:
-            # add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-            print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-            all_clients.remove(sock)
-    return requests
+            Jim.from_dict(presence_msg)
+        except Exception as e:
+            response = JimResponse(400, error=str(e))
+            return response.to_dict()
+        else:
+            response = JimResponse(200)
+            return response.to_dict()
 
 
-@logg
-def response(requests, w_clients, all_clients):
-    """
-    Эхо-ответ сервера клиентам, от которых были запросы
-    :param requests: {сокет: запрос}
-    :param w_clients: список клиентов, которые ожидают ответа
-    :param all_clientts: список всех клиентов
-    :return:
-    """
-    for sock in w_clients:
-        for msg in requests:
+    @logg
+    def request(self, r_clients, all_clients):
+        """
+        Чтение запросов из списка клиентов
+        :param r_clients:
+        :param all_clients:
+        :return: Словарь ответов сервера вида {сокет: запрос}
+        """
+        requests = {}
+        for sock in r_clients:
             try:
-                sock.send(requests[msg].encode('utf-8'))
-                # send_message(w_sock, make_response(requests[sock]))
-                # send_message(w_sock, {'response': time.asctime()})
+                requests[sock] = get_message(sock)
             except:
-                # Сокет недоступен, клиент отключился
                 # add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
                 print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-                sock.close()
                 all_clients.remove(sock)
+        return requests
 
 
-def start(address, port):
-    """
-    Данные хоста:
-    :param address: адрес, на который отправляют запрос клиенты (localhost))
-    :param port: порт, на которым сервер принимает запросы (7777)
-    :return:
-    """
-    host = (address, port)
-    # Список клиентов
-    clients = []
-    with socket(AF_INET, SOCK_STREAM) as sock:
-        sock.bind(host)
-        sock.listen(5)
+    @logg
+    def response(self, requests, w_clients, all_clients):
+        """
+        Эхо-ответ сервера клиентам, от которых были запросы
+        :param requests: {сокет: запрос}
+        :param w_clients: список клиентов, которые ожидают ответа
+        :param all_clientts: список всех клиентов
+        :return:
+        """
+        for sock in w_clients:
+            for msg in requests:
+                try:
+                    # sock.send(requests[msg].encode('utf-8'))
+                    send_message(sock, requests[msg])
+                    # send_message(w_sock, {'response': time.asctime()})
+                except:
+                    # Сокет недоступен, клиент отключился
+                    # add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+                    print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+                    sock.close()
+                    all_clients.remove(sock)
+
+
+class Server:
+
+    def __init__(self, handler, address, port):
+        """
+        Данные хоста:
+        :param address: адрес, на который отправляют запрос клиенты (localhost))
+        :param port: порт, на которым сервер принимает запросы (7777)
+        :return:
+        """
+        self.handler = handler
+        self.host = (address, port)
+        # Список клиентов
+        self.clients = []
+        self.sock = socket(AF_INET, SOCK_STREAM)
+        self.sock.bind((address, port))
+        self.sock.listen(5)
         # Таймаут для операций с сокетом
-        sock.settimeout(0.2)
-        # add_to_log('Эхо-сервер запущен...')
+        self.sock.settimeout(0.2)
+
+
+    def start(self):
         print('Эхо-сервер запущен...')
         while True:
             try:
-                conn, adr = sock.accept()
+                conn, adr = self.sock.accept()
+                presence = get_message(conn)
+                response = self.handler.greet(presence)
+                send_message(conn, response)
             except OSError as e:
                 # Время ожидания вышло
                 pass
@@ -116,7 +129,7 @@ def start(address, port):
                 # add_to_log('Получен запрос на соединение от {}'.format(adr))
                 print('Получен запрос на соединение от {}'.format(adr))
                 # Клиент подключился - добавляем его в список
-                clients.append(conn)
+                self.clients.append(conn)
             finally:
                 timeout = 0
                 r = []
@@ -126,13 +139,13 @@ def start(address, port):
                     # r - сокеты, которые отправляеют сообщения
                     # w - сокеты, которые ожидают ответ
                     # e -  сокеты с ошибкой
-                    r, w, e = select(clients, clients, [], timeout)
+                    r, w, e = select(self.clients, self.clients, [], timeout)
                 except:
                     # Клиент отключился - ничего не делать
                     pass
 
-                requests = request(r, clients)
-                response(requests, w, clients)
+                requests = self.handler.request(r, self.clients)
+                self.handler.response(requests, w, self.clients)
 
 
 if __name__ == '__main__':
@@ -149,4 +162,6 @@ if __name__ == '__main__':
         print('Не верный параметр')
         sys.exit(0)
 
-    start(addr, port)
+    handler = Handler()
+    server = Server(handler, addr, port)
+    server.start()

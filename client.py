@@ -38,15 +38,15 @@ def start(address, port):
     with socket(AF_INET, SOCK_STREAM) as sock:
         sock.connect(host)
         while True:
-            msg = input('Сообщение: ')
-            if msg == 'exit':
-                break
-            else:
-                sock.send(msg.encode('utf-8'))
-            # send_message(sock, message)
-            # rmessage = get_message(sock)
+            # msg = input('Сообщение: ')
+            # if msg == 'exit':
+            #     break
+            # else:
+            #     sock.send(msg.encode('utf-8'))
+            send_message(sock, message)
+            rmessage = get_message(sock)
             # print(response(get_message(sock)))
-            # print(rmessage)
+            print(rmessage)
 
 
 if __name__ == '__main__':

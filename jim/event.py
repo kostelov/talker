@@ -1,6 +1,5 @@
 import json
-
-ENCODING = 'utf-8'
+from .config import ENCODING
 
 
 def dict_to_byte(dict_message):
