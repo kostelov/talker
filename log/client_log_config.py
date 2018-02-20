@@ -1,5 +1,4 @@
 import os
-import logging
 import logging.handlers
 
 LOG_FOLDERS_PATH = os.path.dirname(os.path.abspath(__file__))

@@ -8,30 +8,32 @@
 -a <addr> - IP-адрес для прослушивания (по умолчанию слушает все доступные адреса)
 """
 import time
+import logging
 from select import select
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import get_message, send_message
-import logging
-import server_log_config
-import os
+
+import log.server_log_config
+from log.loger import Log
 
 logger = logging.getLogger('server')
+logg = Log(logger)
 
 
-def log(func):
-    def wrap(*args, **kwargs):
-        result = func(*args, **kwargs)
-        logger.info('функция: {}|модуль: {}|инфо: {}'.format(func.__name__, os.path.basename(__file__), result))
-        return result
-    return wrap
+# def log(func):
+#     def wrap(*args, **kwargs):
+#         result = func(*args, **kwargs)
+#         logger.info('функция: {}|модуль: {}|инфо: {}'.format(func.__name__, os.path.basename(__file__), result))
+#         return result
+#     return wrap
 
 
-@log
-def add_to_log(args):
-    return args
+# @logg
+# def add_to_log(args):
+#     return args
 
 
-@log
+@logg
 def make_response(msg):
     """
     Обработка полученного запроса клиента и формирование ответа
@@ -45,7 +47,7 @@ def make_response(msg):
         return {'response': 400, 'error': 'не верный запрос'}
 
 
-@log
+@logg
 def request(r_clients, all_clients):
     """
     Чтение запросов из списка клиентов
@@ -56,15 +58,15 @@ def request(r_clients, all_clients):
     requests = {}
     for sock in r_clients:
         try:
-            requests[sock] = get_message(sock)
+            requests[sock] = sock.recv(1024).decode('utf-8')# get_message(sock)
         except:
-            add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+            # add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
             print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
             all_clients.remove(sock)
     return requests
 
 
-@log
+@logg
 def response(requests, w_clients, all_clients):
     """
     Эхо-ответ сервера клиентам, от которых были запросы
@@ -73,18 +75,18 @@ def response(requests, w_clients, all_clients):
     :param all_clientts: список всех клиентов
     :return:
     """
-    for sock in all_clients:
-        for w_sock in w_clients:
-            if sock in requests:
-                try:
-                    send_message(w_sock, make_response(requests[sock]))
-                    # send_message(w_sock, {'response': time.asctime()})
-                except:
-                    # Сокет недоступен, клиент отключился
-                    add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-                    print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-                    sock.close()
-                    all_clients.remove(sock)
+    for sock in w_clients:
+        for msg in requests:
+            try:
+                sock.send(requests[msg].encode('utf-8'))
+                # send_message(w_sock, make_response(requests[sock]))
+                # send_message(w_sock, {'response': time.asctime()})
+            except:
+                # Сокет недоступен, клиент отключился
+                # add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+                print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+                sock.close()
+                all_clients.remove(sock)
 
 
 def start(address, port):
@@ -95,14 +97,14 @@ def start(address, port):
     :return:
     """
     host = (address, port)
-    # Список клментов
+    # Список клиентов
     clients = []
     with socket(AF_INET, SOCK_STREAM) as sock:
         sock.bind(host)
         sock.listen(5)
         # Таймаут для операций с сокетом
         sock.settimeout(0.2)
-        add_to_log('Эхо-сервер запущен...')
+        # add_to_log('Эхо-сервер запущен...')
         print('Эхо-сервер запущен...')
         while True:
             try:
@@ -111,7 +113,7 @@ def start(address, port):
                 # Время ожидания вышло
                 pass
             else:
-                add_to_log('Получен запрос на соединение от {}'.format(adr))
+                # add_to_log('Получен запрос на соединение от {}'.format(adr))
                 print('Получен запрос на соединение от {}'.format(adr))
                 # Клиент подключился - добавляем его в список
                 clients.append(conn)

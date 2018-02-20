@@ -2,7 +2,7 @@ import time
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import send_message, get_message
 import logging
-import client_log_config
+import log.client_log_config
 import os
 
 logger = logging.getLogger('client')
@@ -46,7 +46,8 @@ def start(address, port):
         while True:
             # send_message(sock, message)
             # rmessage = get_message(sock)
-            print(response(get_message(sock)))
+            print(sock.recv(1024).decode('utf-8'))
+            # print(response(get_message(sock)))
             # print(rmessage)
 
 

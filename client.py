@@ -1,11 +1,13 @@
 import time
+import logging
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import send_message, get_message
-import logging
-import client_log_config
-import os
+
+import log.client_log_config
+from log.loger import Log
 
 logger = logging.getLogger('client')
+logg = Log(logger)
 
 message = {
     'action': 'presence',
@@ -18,20 +20,12 @@ message = {
 }
 
 
-def log(func):
-    def wrap(*args, **kwargs):
-        result = func(*args, **kwargs)
-        logger.info('функция: {}|модуль: {}|инфо: {}'.format(func.__name__, os.path.basename(__file__), result))
-        return result
-    return wrap
+# @logg
+# def add_to_log(args):
+#     return args
 
 
-@log
-def add_to_log(args):
-    return args
-
-
-@log
+@logg
 def response(msg):
     if 'response' in msg and msg['response'] == 200:
         return msg['message']
@@ -44,9 +38,14 @@ def start(address, port):
     with socket(AF_INET, SOCK_STREAM) as sock:
         sock.connect(host)
         while True:
-            send_message(sock, message)
+            msg = input('Сообщение: ')
+            if msg == 'exit':
+                break
+            else:
+                sock.send(msg.encode('utf-8'))
+            # send_message(sock, message)
             # rmessage = get_message(sock)
-            print(response(get_message(sock)))
+            # print(response(get_message(sock)))
             # print(rmessage)
 
 

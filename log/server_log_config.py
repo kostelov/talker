@@ -1,6 +1,6 @@
-import logging
-import logging.handlers
 import os
+import logging.handlers
+
 
 LOG_FOLDERS_PATH = os.path.dirname(os.path.abspath(__file__))
 SERVER_LOG_FILE_PATH = os.path.join(LOG_FOLDERS_PATH, 'server.log')
