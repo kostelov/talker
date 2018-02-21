@@ -33,6 +33,7 @@ class JimResponse:
         elif self.response == WRONG_REQUEST or self.response == SERVER_ERROR:
             return {RESPONSE: self.response, TIME: time.time(), ERROR: self.error}
 
+
 class JimPresence:
 
     def __init__(self, login):
@@ -43,26 +44,13 @@ class JimPresence:
         return message
 
 
+class JimMessage:
 
+    def __init__(self, msg_to, login, text):
+        self.msg_to = msg_to
+        self.login = login
+        self.text = text
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def create(self):
+        message = {ACTION: MSG, TIME: time.time(), TO: self.msg_to, FROM: self.login, MESSAGE: self.text}
+        return message

@@ -39,7 +39,7 @@ class Handler:
     def greet(self, presence_msg):
         """
         Выполнить приветствие
-        :param presence_message: запрос (словарь)
+        :param presence_msg: запрос (словарь)
         :return: ответ сервера (словарь)
         """
         try:
@@ -51,13 +51,12 @@ class Handler:
             response = JimResponse(200)
             return response.to_dict()
 
-
     @logg
     def request(self, r_clients, all_clients):
         """
         Чтение запросов из списка клиентов
-        :param r_clients:
-        :param all_clients:
+        :param r_clients: список клиентов, которые пишут
+        :param all_clients: все клиенты
         :return: Словарь ответов сервера вида {сокет: запрос}
         """
         requests = {}
@@ -70,7 +69,6 @@ class Handler:
                 all_clients.remove(sock)
         return requests
 
-
     @logg
     def response(self, requests, w_clients, all_clients):
         """
@@ -78,7 +76,7 @@ class Handler:
         :param requests: {сокет: запрос}
         :param w_clients: список клиентов, которые ожидают ответа
         :param all_clientts: список всех клиентов
-        :return:
+        :return: None
         """
         for sock in w_clients:
             for msg in requests:
@@ -113,7 +111,6 @@ class Server:
         # Таймаут для операций с сокетом
         self.sock.settimeout(0.2)
 
-    @logg
     def start(self):
         print('Эхо-сервер запущен...')
         while True:
@@ -122,7 +119,7 @@ class Server:
                 presence = get_message(conn)
                 response = self.handler.greet(presence)
                 send_message(conn, response)
-            except OSError as e:
+            except OSError:
                 # Время ожидания вышло
                 pass
             else:
@@ -155,13 +152,13 @@ if __name__ == '__main__':
     except IndexError:
         addr = ''
     try:
-        port = int(sys.argv[2])
+        prt = int(sys.argv[2])
     except IndexError:
-        port = 7777
+        prt = 7777
     except ValueError:
         print('Не верный параметр')
         sys.exit(0)
 
     handler = Handler()
-    server = Server(handler, addr, port)
+    server = Server(handler, addr, prt)
     server.start()

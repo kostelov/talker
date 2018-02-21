@@ -9,6 +9,8 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 client_logger = logging.getLogger('client')
 # Обработчик будет логгер, который пишет в файл
 client_handler = logging.FileHandler(CLIENT_LOG_FILE_PATH, encoding='utf-8')
+# Задаем уровень обработчика
+# client_handler.setLevel(logging.INFO)
 # Связываем логгер с обработчиком
 client_logger.addHandler(client_handler)
 # Связываем обработчик с форматером
