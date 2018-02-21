@@ -9,6 +9,7 @@ USER = 'user'
 ACCOUNT_NAME = 'account_name'
 RESPONSE = 'response'
 ERROR = 'error'
+TYPE = 'type'
 
 # Значения
 PRESENCE = 'presence'

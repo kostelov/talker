@@ -113,7 +113,7 @@ class Server:
         # Таймаут для операций с сокетом
         self.sock.settimeout(0.2)
 
-
+    @logg
     def start(self):
         print('Эхо-сервер запущен...')
         while True:

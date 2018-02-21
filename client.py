@@ -32,7 +32,7 @@ def response(msg):
     elif 'response' in msg and msg['response'] == 400:
         return msg['error']
 
-
+@logg
 def start(address, port):
     host = (address, port)
     with socket(AF_INET, SOCK_STREAM) as sock:

@@ -1,4 +1,5 @@
 import os
+import logging
 import logging.handlers
 
 
@@ -8,7 +9,7 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 # Логгер с именем server
 server_logger = logging.getLogger('server')
 # Создаем обработчик с ротацией файла лога по дням
-server_handler = logging.handlers.TimedRotatingFileHandler(SERVER_LOG_FILE_PATH, when='MIDNIGHT')
+server_handler = logging.handlers.TimedRotatingFileHandler(SERVER_LOG_FILE_PATH, when='D')
 # Связывваем обработчки с форматером
 server_handler.setFormatter(formatter)
 # Связываем логгер с обработчиком
