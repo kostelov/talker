@@ -24,7 +24,7 @@ class Client:
         self.sock = socket(AF_INET, SOCK_STREAM)
 
     @logg
-    def response(self, msg):
+    def parsing(self, msg):
         if 'response' in msg and msg['response'] == 200:
             return msg['message']
         elif 'response' in msg and msg['response'] == 400:

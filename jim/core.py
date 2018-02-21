@@ -54,3 +54,6 @@ class JimMessage:
     def create(self):
         message = {ACTION: MSG, TIME: time.time(), TO: self.msg_to, FROM: self.login, MESSAGE: self.text}
         return message
+
+    def parsed(self):
+        pass
