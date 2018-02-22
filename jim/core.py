@@ -4,9 +4,6 @@ import time
 
 class Jim:
 
-    # def __init__(self, *args, **dictmsg):
-    #     self.dictmsg = dictmsg
-
     @staticmethod
     def from_dict(dictmsg):
         if ACTION in dictmsg and dictmsg[ACTION] == PRESENCE and TIME in dictmsg and isinstance(dictmsg[TIME], float):
@@ -46,14 +43,10 @@ class JimPresence:
 
 class JimMessage:
 
-    def __init__(self, msg_to, login, text):
-        self.msg_to = msg_to
-        self.login = login
-        self.text = text
-
-    def create(self):
-        message = {ACTION: MSG, TIME: time.time(), TO: self.msg_to, FROM: self.login, MESSAGE: self.text}
+    def create(self, data):
+        message = {ACTION: MSG, TIME: time.time(), TO: data[0], FROM: data[1], MESSAGE: data[2]}
         return message
 
-    def parsed(self):
-        pass
+    def parsed(self, dictmsg):
+        message = dictmsg[MESSAGE]
+        return message

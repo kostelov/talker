@@ -21,18 +21,6 @@ logger = logging.getLogger('server')
 logg = Log(logger)
 
 
-# def log(func):
-#     def wrap(*args, **kwargs):
-#         result = func(*args, **kwargs)
-#         logger.info('функция: {}|модуль: {}|инфо: {}'.format(func.__name__, os.path.basename(__file__), result))
-#         return result
-#     return wrap
-
-
-# @logg
-# def add_to_log(args):
-#     return args
-
 class Handler:
 
     @logg

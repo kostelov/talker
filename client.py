@@ -2,7 +2,7 @@ import time
 import logging
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import send_message, get_message
-from jim.core import Jim, JimResponse, JimPresence, JimMessage
+from jim.core import Jim, JimPresence, JimMessage
 from jim.config import *
 
 import log.client_log_config
@@ -10,10 +10,6 @@ from log.loger import Log
 
 logger = logging.getLogger('client')
 logg = Log(logger)
-
-# @logg
-# def add_to_log(args):
-#     return args
 
 
 class Client:
@@ -25,10 +21,8 @@ class Client:
 
     @logg
     def parsing(self, msg):
-        if 'response' in msg and msg['response'] == 200:
-            return msg['message']
-        elif 'response' in msg and msg['response'] == 400:
-            return msg['error']
+        result = JimMessage()
+        return result.parsed(msg)
 
     @logg
     def presence(self):
@@ -39,17 +33,19 @@ class Client:
         """
         Подготовка сообщения для отправки на сервер
         :param msg_to: получатель
-        :param text: тест сообщения
+        :param text: текст сообщения
         :return: словарь
         """
-        msg = JimMessage(msg_to, self.login, text)
-        return msg.create()
+        data = (msg_to, self.login, text,)
+        msg = JimMessage()
+        return msg.create(data)
 
     def read_message(self):
         print('Режим чтения...')
         while True:
             msg = get_message(self.sock)
-            print(msg['message'])
+            print(msg)
+            print(self.parsing(msg))
 
     def write_message(self):
         print('Режим трансляции...')
@@ -73,16 +69,6 @@ class Client:
                 self.write_message()
             else:
                 raise Exception('Не верный режим работы клиента')
-        # while True:
-            # msg = input('Сообщение: ')
-            # if msg == 'exit':
-            #     break
-            # else:
-            #     sock.send(msg.encode('utf-8'))
-            # send_message(self.sock, message)
-            # rmessage = get_message(self.sock)
-            # print(response(get_message(sock)))
-            # print(rmessage)
 
 
 if __name__ == '__main__':
