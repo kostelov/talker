@@ -9,9 +9,10 @@ Base = declarative_base()
 class User(Base):
     # Название таблицы
     __tablename__ = 'users'
+    # id первичный ключ
     uid = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String, nullable=False)
-    info = Column(String, nullable=True)
+    name = Column(String(25), nullable=False, unique=True)
+    info = Column(String(50), nullable=True)
 
     def __init__(self, name, info=None):
         self.name = name
@@ -33,8 +34,11 @@ class Contacts(Base):
         self.cid = contact_id
 
 
+# Создаем движок
 engine = create_engine('sqlite:///{}'.format(DB_PATH), echo=True)
+# Создаем структуру БД
 metadata = Base.metadata
 metadata.create_all(engine)
+# Создаем сессию для работы
 Session = sessionmaker(bind=engine)
 session = Session()
