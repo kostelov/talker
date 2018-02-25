@@ -1,9 +1,5 @@
 from .config_db import *
-from sqlalchemy import Column, Integer, ForeignKey, String, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
-# Base = declarative_base()
+from sqlalchemy import Column, Integer, ForeignKey, String
 
 
 class User(Base):
@@ -35,15 +31,6 @@ class Contacts(Base):
     contact_id = Column(Integer, ForeignKey('User.uid'))
 
     def __init__(self, user_id, contact_id):
-        self.uid = user_id
-        self.cid = contact_id
-
-
-# # Создаем движок
-# engine = create_engine('sqlite:///{}'.format(DB_SEVER_PATH), echo=True)
-# # Создаем структуру БД
-# metadata = Base.metadata
-# metadata.create_all(engine)
-# # Создаем сессию для работы
-# Session = sessionmaker(bind=engine)
-# session = Session()
+        # .user_id должно совпадать с именем атрибута в таблице user_id
+        self.user_id = user_id
+        self.contact_id = contact_id
