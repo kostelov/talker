@@ -43,10 +43,25 @@ class JimPresence:
 
 class JimMessage:
 
-    def create(self, data):
+    @staticmethod
+    def create(data):
         message = {ACTION: MSG, TIME: time.time(), TO: data[0], FROM: data[1], MESSAGE: data[2]}
         return message
 
-    def parsed(self, dictmsg):
+    @staticmethod
+    def parsed(dictmsg):
         message = dictmsg[MESSAGE]
         return message
+
+
+class JimContactList:
+
+    def __init__(self, login):
+        self.login = login
+
+    def getcontacts(self):
+        message = {ACTION: GET_CONTACTS, TIME: time.time(), USER: {ACCOUNT_NAME: self.login}}
+        return message
+
+    def parsed(self, dictmsg):
+        pass

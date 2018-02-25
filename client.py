@@ -51,7 +51,7 @@ class Client:
         print('Режим трансляции...')
         while True:
             text = input('>> ')
-            if text == 'quit':
+            if text == QUIT:
                 break
             else:
                 msg = self.prepare_message('#all', text)

@@ -14,6 +14,7 @@ TYPE = 'type'
 # Значения
 PRESENCE = 'presence'
 PROBE = 'probe'
+GET_CONTACTS = 'get_contacts'
 MSG = 'msg'
 QUIT = 'quit'
 AUTH = 'auth'

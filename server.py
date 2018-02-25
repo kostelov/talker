@@ -7,12 +7,12 @@
 -p <port> - TCP-порт для работы (по умолчанию использует порт 7777)
 -a <addr> - IP-адрес для прослушивания (по умолчанию слушает все доступные адреса)
 """
-import time
 import logging
 from select import select
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import get_message, send_message
 from jim.core import Jim, JimResponse
+
 
 import log.server_log_config
 from log.loger import Log
@@ -52,7 +52,6 @@ class Handler:
             try:
                 requests[sock] = get_message(sock)
             except:
-                # add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
                 print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
                 all_clients.remove(sock)
         return requests
@@ -69,12 +68,9 @@ class Handler:
         for sock in w_clients:
             for msg in requests:
                 try:
-                    # sock.send(requests[msg].encode('utf-8'))
-                    send_message(sock, requests[msg])
-                    # send_message(w_sock, {'response': time.asctime()})
+                   send_message(sock, requests[msg])
                 except:
                     # Сокет недоступен, клиент отключился
-                    # add_to_log('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
                     print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
                     sock.close()
                     all_clients.remove(sock)
@@ -111,7 +107,6 @@ class Server:
                 # Время ожидания вышло
                 pass
             else:
-                # add_to_log('Получен запрос на соединение от {}'.format(adr))
                 print('Получен запрос на соединение от {}'.format(adr))
                 # Клиент подключился - добавляем его в список
                 self.clients.append(conn)
