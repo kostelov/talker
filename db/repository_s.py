@@ -10,11 +10,8 @@ class Repository:
     def add_user(self, username, info=None):
         """ Добавление нового пользователя """
         new_user = User(username, info)
-        if self.user_exist(new_user):
-            raise UserAlreadyExists(username)
-        else:
-            self.session.add(new_user)
-            self.session.commit()
+        self.session.add(new_user)
+        self.session.commit()
 
     def user_exist(self, username):
         """ Проверяем существует ли пользователь """
@@ -61,6 +58,7 @@ class Repository:
                 del_contact = self.session.query(Contacts).filter(
                     Contacts.user_id == user.uid).filter(Contacts.contact_id == contact.uid).first()
                 self.session.delete(del_contact)
+                self.session.commit()
             else:
                 raise UserDoesNotExist(user)
         else:
