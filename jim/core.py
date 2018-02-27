@@ -54,10 +54,11 @@ class JimResponse(Jim):
 
     def to_dict(self):
         message = super().to_dict()
-        if self.response == BASIC_NOTICE or self.response == OK:
+        if self.response == BASIC_NOTICE or self.response == OK or self.response == ACCEPTED:
             message[ACTION] = RESPONSE
             message[TIME] = nix_time.time()
             message[CODE] = self.response
+            message[MESSAGE] = self.error
             return message
         elif self.response == WRONG_REQUEST or self.response == SERVER_ERROR:
             message[ACTION] = RESPONSE
@@ -85,7 +86,7 @@ class JimPresence(Jim):
         return message
 
 
-class JimMessage(Jim):
+class JimMessage():
 
     @staticmethod
     def create(data):
@@ -98,14 +99,42 @@ class JimMessage(Jim):
         return message
 
 
-class JimContactList:
+class JimGetContacts(Jim):
 
     def __init__(self, login):
         self.login = login
 
-    def getcontacts(self):
-        message = {ACTION: GET_CONTACTS, TIME: nix_time.time(), USER: {ACCOUNT_NAME: self.login}}
+    def to_dict(self):
+        message = super().to_dict()
+        message[ACTION] = GET_CONTACTS
+        message[TIME] = nix_time.time()
+        message[USER] = self.login
         return message
 
-    def parsed(self, dictmsg):
-        pass
+
+class JimAddContact(Jim):
+    def __init__(self, login, contact_name):
+        self.login = login
+        self.contact = contact_name
+
+    def to_dict(self):
+        message = super().to_dict()
+        message[ACTION] = ADD_CONTACT
+        message[TIME] = nix_time.time()
+        message[USER] = self.login
+        message[TO] = self.contact
+        return message
+
+
+class JimDelContact(Jim):
+    def __init__(self, login, contact_name):
+        self.login = login
+        self.contact = contact_name
+
+    def to_dict(self):
+        message = super().to_dict()
+        message[ACTION] = DEL_CONTACT
+        message[TIME] = nix_time.time()
+        message[USER] = self.login
+        message[TO] = self.contact
+        return message

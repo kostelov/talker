@@ -11,10 +11,11 @@ import logging
 from select import select
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import get_message, send_message
-from jim.core import Jim, JimResponse
+from jim.core import *
 from jim.config import *
 from db.repository_s import Repository
 from db.config_db import session
+from db.errors import *
 
 
 import log.server_log_config
@@ -78,8 +79,44 @@ class Handler:
         for sock in w_clients:
             for msg in messages:
                 try:
-                   # send_message(sock, requests[msg])
-                   send_message(sock, msg)
+                    # Получаем словарь
+                    jmsg = Jim.from_dict(msg)
+                    if jmsg[ACTION] == GET_CONTACTS:
+                        # Извлекаем имя пользователя и передаем в запрос
+                        contacts = self.repo.get_contacts(jmsg[USER])
+                        # Получаем контакты и заносим в список
+                        contact_names = [contact.name for contact in contacts]
+                        # Все ОК, формируем ответ (список контакток помещаем в поле для сообщений) и отправляем
+                        resp = JimResponse(OK, contact_names)
+                        send_message(sock, resp.to_dict())
+                    elif jmsg[ACTION] == ADD_CONTACT:
+                        # Извлекам пользователя и контакт
+                        user_name = jmsg[USER]
+                        contact_name = jmsg[TO]
+                        try:
+                            # Добавляем в друзья пользователю контакт и наоборот
+                            self.repo.add_contact(user_name, contact_name)
+                            # Все ОК, формируем ответ и отправляем
+                            resp = JimResponse(ACCEPTED)
+                            send_message(sock, resp.to_dict())
+                        except UserDoesNotExist as e:
+                            resp = JimResponse(WRONG_REQUEST, error='Контакт отсутствует')
+                            send_message(sock, resp.to_dict())
+                    elif jmsg[ACTION] == DEL_CONTACT:
+                        # Извлекам пользователя и контакт
+                        user_name = jmsg[USER]
+                        contact_name = jmsg[TO]
+                        try:
+                            # Удаляем контакт из друзей пользователя
+                            self.repo.del_contact(user_name, contact_name)
+                            # Все ОК, формируем ответ и отправляем
+                            resp = JimResponse(ACCEPTED)
+                            send_message(sock, resp.to_dict())
+                        except UserDoesNotExist as e:
+                            # Контакта нет, вызываем исключение
+                            resp = JimResponse(WRONG_REQUEST, error='Контакт отсутствует')
+                            send_message(sock, resp.to_dict())
+                    # send_message(sock, msg)
                 except:
                     # Сокет недоступен, клиент отключился
                     print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))

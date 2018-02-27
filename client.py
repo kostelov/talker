@@ -2,7 +2,7 @@ import time
 import logging
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import send_message, get_message
-from jim.core import Jim, JimPresence, JimMessage
+from jim.core import *
 from jim.config import *
 
 import log.client_log_config
@@ -40,6 +40,24 @@ class Client:
         msg = JimMessage()
         return msg.create(data)
 
+    def get_contacts(self):
+        msg = JimGetContacts(self.login)
+        send_message(self.sock, msg.to_dict())
+        response = get_message(self.sock)
+        return response[MESSAGE]
+
+    def add_contact(self, contact_name):
+        msg = JimAddContact(self.login, contact_name)
+        send_message(self.sock, msg.to_dict())
+        response = get_message(self.sock)
+        return response
+
+    def del_contact(self, contact_name):
+        msg = JimDelContact(self.login, contact_name)
+        send_message(self.sock, msg.to_dict())
+        response = get_message(self.sock)
+        return response
+
     def read_message(self):
         print('Режим чтения...')
         while True:
@@ -51,11 +69,28 @@ class Client:
         print('Режим трансляции...')
         while True:
             text = input('>> ')
-            if text == QUIT:
+            if text == 'list':
+                for items in self.get_contacts():
+                    print(items)
+            elif text == QUIT:
                 break
             else:
-                msg = self.prepare_message('#all', text)
-                send_message(self.sock, msg)
+                command, param = text.split()
+                if command == 'add':
+                    response = self.add_contact(param)
+                    if response[CODE] == ACCEPTED:
+                        print('Контакт добавлен')
+                    else:
+                        print(response[MESSAGE])
+                elif command == 'del':
+                    response = self.del_contact(param)
+                    if response[CODE] == ACCEPTED:
+                        print('Контакт удален')
+                    else:
+                        print(response[MESSAGE])
+            # else:
+            #     msg = self.prepare_message('#all', text)
+            #     send_message(self.sock, msg)
 
     def start(self, rw_mode):
         self.sock.connect(self.host)
@@ -86,7 +121,7 @@ if __name__ == '__main__':
     try:
         mode = sys.argv[3]
     except IndexError:
-        mode = 'r'
+        mode = 'w'
 
     user = 'Nick'
     client = Client(addr, prt, user)
