@@ -17,10 +17,10 @@ class TestRepository:
         # Создаем пользователей и сохраняем в БД
         u = User('Max', 'Максим Максимов')
         self.session.add(u)
-        users = [User('Nat'), User('Ivan', 'Иван Петров')]
+        users = [User('Nat'), User('Ivan', 'Иван Петров'), User('Nick', 'Николай')]
         self.session.add_all(users)
         # Добавляем связи в таблицу Contacts
-        rel = [Contacts(1, 2), Contacts(2, 1), Contacts(1,3), Contacts(3,1)]
+        rel = [Contacts(1, 2), Contacts(2, 1), Contacts(1, 3), Contacts(3, 1)]
         self.session.add_all(rel)
 
         self.repo = Repository(self.session)
