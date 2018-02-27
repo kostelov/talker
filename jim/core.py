@@ -4,6 +4,17 @@ import time
 
 class Jim:
 
+    def to_dict(self):
+        result = {
+            ACTION: None,
+            TIME: None,
+            USER: None,
+            TO: None,
+            CODE: None,
+            MESSAGE: None
+        }
+        return result
+
     @staticmethod
     def from_dict(dictmsg):
         if ACTION in dictmsg and dictmsg[ACTION] == PRESENCE and TIME in dictmsg and isinstance(dictmsg[TIME], float):
