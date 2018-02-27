@@ -1,5 +1,5 @@
 from .config import *
-import time
+import time as nix_time
 
 
 class Jim:
@@ -29,34 +29,50 @@ class Jim:
             return WRONG_REQUEST
 
 
-class JimResponse:
+class JimResponse(Jim):
 
     def __init__(self, response, error=None):
         self.response = response
         self.error = error
 
     def to_dict(self):
+        message = super().to_dict()
         if self.response == BASIC_NOTICE or self.response == OK:
-            return {RESPONSE: self.response, TIME: time.time()}
+            message[ACTION] = RESPONSE
+            message[TIME] = nix_time.time()
+            message[CODE] = self.response
+            return message
         elif self.response == WRONG_REQUEST or self.response == SERVER_ERROR:
-            return {RESPONSE: self.response, TIME: time.time(), ERROR: self.error}
+            message[ACTION] = RESPONSE
+            message[TIME] = nix_time.time()
+            message[CODE] = self.response
+            message[MESSAGE] = self.error
+            return message
 
 
-class JimPresence:
+class JimPresence(Jim):
 
-    def __init__(self, login):
-        self.login = login
+    def __init__(self, action, login, time=None):
+        self.action = action
+        self.user = login
+        if time:
+            self.time = time
+        else:
+            self.time = nix_time.time()
 
     def create(self):
-        message = {ACTION: PRESENCE, TIME: time.time(), USER: {ACCOUNT_NAME: self.login}}
+        message = super().to_dict()
+        message[ACTION] = self.action
+        message[TIME] = self.time
+        message[USER] = self.user
         return message
 
 
-class JimMessage:
+class JimMessage(Jim):
 
     @staticmethod
     def create(data):
-        message = {ACTION: MSG, TIME: time.time(), TO: data[0], FROM: data[1], MESSAGE: data[2]}
+        message = {ACTION: MSG, TIME: nix_time.time(), TO: data[0], FROM: data[1], MESSAGE: data[2]}
         return message
 
     @staticmethod
@@ -71,7 +87,7 @@ class JimContactList:
         self.login = login
 
     def getcontacts(self):
-        message = {ACTION: GET_CONTACTS, TIME: time.time(), USER: {ACCOUNT_NAME: self.login}}
+        message = {ACTION: GET_CONTACTS, TIME: nix_time.time(), USER: {ACCOUNT_NAME: self.login}}
         return message
 
     def parsed(self, dictmsg):

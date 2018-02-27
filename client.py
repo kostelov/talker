@@ -26,7 +26,7 @@ class Client:
 
     @logg
     def presence(self):
-        presence_msg = JimPresence(self.login)
+        presence_msg = JimPresence(PRESENCE, self.login)
         return presence_msg.create()
 
     def prepare_message(self, msg_to, text):
