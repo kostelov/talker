@@ -5,6 +5,10 @@ import time as nix_time
 class Jim:
 
     def to_dict(self):
+        """
+        Формируем базовый словарь
+        :return: возвращаем шаблон для всех типов сообщений
+        """
         result = {
             ACTION: None,
             TIME: None,
@@ -17,16 +21,29 @@ class Jim:
 
     @staticmethod
     def from_dict(dictmsg):
-        if ACTION in dictmsg and dictmsg[ACTION] == PRESENCE and TIME in dictmsg and isinstance(dictmsg[TIME], float):
-            return OK
-        elif RESPONSE in dictmsg and isinstance(dictmsg[RESPONSE], int) and TIME in dictmsg \
-                and isinstance(dictmsg[TIME], float):
-            if dictmsg[RESPONSE] == OK:
-                return dictmsg[RESPONSE]
-            elif dictmsg[RESPONSE] == WRONG_REQUEST or dictmsg[RESPONSE] == SERVER_ERROR:
-                return dictmsg[RESPONSE], dictmsg[ERROR]
-        else:
-            return WRONG_REQUEST
+        """
+        Проверяет входной словарь на корректность
+        :param dictmsg: входной словарь
+        :return: если все ОК вернет исходный словарь
+        """
+        # Проверяем есть ли в словаре действие
+        if ACTION in dictmsg:
+            # Достаем дейтсвие
+            action = dictmsg[ACTION]
+            user = dictmsg[USER]
+            account_name = dictmsg[TO]
+            if action in ACTIONS:
+                if action == PRESENCE:
+                    return dictmsg[USER]
+                elif action == RESPONSE and dictmsg[CODE] is not None:
+                    return dictmsg
+                elif action == ADD_USER or action == GET_USER or action == GET_CONTACTS \
+                        and user is not None:
+                    return dictmsg
+                elif action == ADD_CONTACT or action == DEL_CONTACT and user is not None and account_name is not None:
+                    return dictmsg
+                elif action == MSG:
+                    return dictmsg
 
 
 class JimResponse(Jim):

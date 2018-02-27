@@ -14,7 +14,7 @@ logg = Log(logger)
 
 class Client:
 
-    def __init__(self, address, port, login='Guest'):
+    def __init__(self, address, port, login=None):
         self.login = login
         self.host = (address, port)
         self.sock = socket(AF_INET, SOCK_STREAM)
@@ -62,13 +62,13 @@ class Client:
         send_message(self.sock, self.presence())
         response_msg = get_message(self.sock)
         result_response = Jim.from_dict(response_msg)
-        if result_response == OK:
+        if result_response[CODE] == OK:
             if rw_mode == 'r':
                 self.read_message()
             if rw_mode == 'w':
                 self.write_message()
             else:
-                raise Exception('Не верный режим работы клиента')
+                print(result_response[CODE], result_response[MESSAGE])
 
 
 if __name__ == '__main__':

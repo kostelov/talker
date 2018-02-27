@@ -12,6 +12,9 @@ from select import select
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.event import get_message, send_message
 from jim.core import Jim, JimResponse
+from jim.config import *
+from db.repository_s import Repository
+from db.config_db import session
 
 
 import log.server_log_config
@@ -22,21 +25,25 @@ logg = Log(logger)
 
 
 class Handler:
+    def __init__(self):
+        self.repo = Repository(session)
 
     @logg
     def greet(self, presence_msg):
         """
-        Выполнить приветствие
+        Выполнить приветствие, регистрацию пользователя если его еще нет
         :param presence_msg: запрос (словарь)
         :return: ответ сервера (словарь)
         """
         try:
-            Jim.from_dict(presence_msg)
+            user = Jim.from_dict(presence_msg)
+            if not self.repo.user_exist(user):
+                self.repo.add_user(user)
         except Exception as e:
-            response = JimResponse(400, error=str(e))
+            response = JimResponse(WRONG_REQUEST, error=str(e))
             return response.to_dict()
         else:
-            response = JimResponse(200)
+            response = JimResponse(OK)
             return response.to_dict()
 
     @logg
@@ -47,17 +54,20 @@ class Handler:
         :param all_clients: все клиенты
         :return: Словарь ответов сервера вида {сокет: запрос}
         """
-        requests = {}
+        # requests = {}
+        messages = []
         for sock in r_clients:
             try:
-                requests[sock] = get_message(sock)
+                msg = get_message(sock)
+                messages.append(msg)
+                # requests[sock] = msg
             except:
                 print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
                 all_clients.remove(sock)
-        return requests
+        return messages # requests
 
     @logg
-    def response(self, requests, w_clients, all_clients):
+    def response(self, messages, w_clients, all_clients):
         """
         Эхо-ответ сервера клиентам, от которых были запросы
         :param requests: {сокет: запрос}
@@ -66,9 +76,10 @@ class Handler:
         :return: None
         """
         for sock in w_clients:
-            for msg in requests:
+            for msg in messages:
                 try:
-                   send_message(sock, requests[msg])
+                   # send_message(sock, requests[msg])
+                   send_message(sock, msg)
                 except:
                     # Сокет недоступен, клиент отключился
                     print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))

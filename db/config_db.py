@@ -8,7 +8,7 @@ Base = declarative_base()
 DB_FOLDER_PATH = os.path.dirname(os.path.abspath(__file__))
 DB_SEVER_PATH = os.path.join(DB_FOLDER_PATH, 'server.db')
 # Создаем движок
-engine = create_engine('sqlite:///{}'.format(DB_SEVER_PATH), echo=True)
+engine = create_engine('sqlite:///{}'.format(DB_SEVER_PATH), echo=False)
 # Создаем структуру БД
 metadata = Base.metadata
 metadata.create_all(engine)
