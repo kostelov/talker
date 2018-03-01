@@ -63,3 +63,6 @@ class Repository:
                 raise UserDoesNotExist(user)
         else:
             raise UserDoesNotExist(contact)
+
+    def get_clients(self):
+        return self.session.query(User).all()

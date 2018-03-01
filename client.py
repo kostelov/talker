@@ -12,12 +12,11 @@ logger = logging.getLogger('client')
 logg = Log(logger)
 
 
-class Client:
+class User:
 
-    def __init__(self, address, port, login=None):
+    def __init__(self, login):
         self.login = login
-        self.host = (address, port)
-        self.sock = socket(AF_INET, SOCK_STREAM)
+        self.host = ('localhost', 7777)
 
     @logg
     def parsing(self, msg):
@@ -26,7 +25,7 @@ class Client:
 
     @logg
     def presence(self):
-        presence_msg = JimPresence(PRESENCE, self.login)
+        presence_msg = JimPresence(PRESENCE, self.login, time.time())
         return presence_msg.create()
 
     def prepare_message(self, msg_to, text):
@@ -58,11 +57,14 @@ class Client:
         response = get_message(self.sock)
         return response
 
+    def stop(self):
+        self.sock.close()
+
     def read_message(self):
         print('Режим чтения...')
         while True:
             msg = get_message(self.sock)
-            print(msg)
+            # print(msg)
             print(self.parsing(msg))
 
     def write_message(self):
@@ -70,6 +72,7 @@ class Client:
         while True:
             text = input('>> ')
             if text == 'list':
+                print('Список контактов:')
                 for items in self.get_contacts():
                     print(items)
             elif text == QUIT:
@@ -93,17 +96,19 @@ class Client:
             #     send_message(self.sock, msg)
 
     def start(self, rw_mode):
+        self.sock = socket(AF_INET, SOCK_STREAM)
         self.sock.connect(self.host)
         send_message(self.sock, self.presence())
         response_msg = get_message(self.sock)
         result_response = Jim.from_dict(response_msg)
-        if result_response[CODE] == OK:
-            if rw_mode == 'r':
-                self.read_message()
-            if rw_mode == 'w':
-                self.write_message()
-            else:
-                print(result_response[CODE], result_response[MESSAGE])
+        return result_response
+        # if result_response[CODE] == OK:
+        #     if rw_mode == 'r':
+        #         self.read_message()
+        #     if rw_mode == 'w':
+        #         self.write_message()
+        #     else:
+        #         print(result_response[CODE], result_response[MESSAGE])
 
 
 if __name__ == '__main__':
@@ -123,6 +128,6 @@ if __name__ == '__main__':
     except IndexError:
         mode = 'w'
 
-    user = 'Nick'
-    client = Client(addr, prt, user)
+    client = User('Nick')
     client.start(mode)
+    client.write_message()
