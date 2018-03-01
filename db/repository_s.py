@@ -49,6 +49,16 @@ class Repository:
                 result.append(contact)
         return result
 
+    def contact_exist(self, user_name, contact_name):
+        count = 0
+        contact = self.get_user(contact_name)
+        if contact:
+            user = self.get_user(user_name)
+            if user:
+                count = self.session.query(Contacts).filter(
+                    Contacts.user_id == user.uid).filter(Contacts.contact_id == contact.uid).count()
+        return count
+
     def del_contact(self, user_name, contact_name):
         """ Удалить пользователя из списка контактов """
         contact = self.get_user(contact_name)

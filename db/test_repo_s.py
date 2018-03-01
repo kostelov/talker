@@ -26,8 +26,7 @@ class TestRepository:
         self.repo = Repository(self.session)
 
     def test_add_user(self):
-        with raises(sqlalchemy.exc.ArgumentError):
-            self.repo.add_user('Test')
+        assert self.repo.add_user('Test') == None
         assert self.repo.user_exist('Max')
 
     def test_user_exist(self):
@@ -60,6 +59,10 @@ class TestRepository:
         with raises(UserDoesNotExist):
             self.repo.add_contact('Max', 'None')
 
+    def test_contact_exist(self):
+        res = self.repo.contact_exist('Max', 'Nat')
+        assert res > 0
+
     def teardown(self):
-        # self.session.rollback()
+        self.session.rollback()
         self.session.close()

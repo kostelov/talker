@@ -94,11 +94,15 @@ class Handler:
                         user_name = jmsg[USER]
                         contact_name = jmsg[TO]
                         try:
-                            # Добавляем в друзья пользователю контакт и наоборот
-                            self.repo.add_contact(user_name, contact_name)
-                            # Все ОК, формируем ответ и отправляем
-                            resp = JimResponse(ACCEPTED)
-                            send_message(sock, resp.to_dict())
+                            if not self.repo.contact_exist(user_name, contact_name):
+                                # Добавляем в друзья пользователю контакт и наоборот
+                                self.repo.add_contact(user_name, contact_name)
+                                # Все ОК, формируем ответ и отправляем
+                                resp = JimResponse(ACCEPTED)
+                                send_message(sock, resp.to_dict())
+                            else:
+                                resp = JimResponse(WRONG_REQUEST, error='Контакт уже добавлен')
+                                send_message(sock, resp.to_dict())
                         except UserDoesNotExist as e:
                             resp = JimResponse(WRONG_REQUEST, error='Контакт отсутствует')
                             send_message(sock, resp.to_dict())

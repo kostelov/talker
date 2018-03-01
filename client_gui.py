@@ -1,6 +1,7 @@
 from PyQt5 import QtWidgets, uic
 import sys
 from client import User
+from jim.config import *
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -46,9 +47,12 @@ class ButtonAddContact(ButtonList):
         contact_name = window.lineEditContactName.text()
         if contact_name:
             # Проверяем, что поле не пустое, отправляем запрос
-            self.client.add_contact(contact_name)
-            # Обновляем список контактов
-            window.listWidgetContact.addItem(contact_name)
+            result = self.client.add_contact(contact_name)
+            if result[CODE] == OK:
+                # Обновляем список контактов
+                window.listWidgetContact.addItem(contact_name)
+            else:
+                print(result[MESSAGE])
         else:
             print('Укажите имя контакта')
 
