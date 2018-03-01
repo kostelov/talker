@@ -2,9 +2,6 @@
 <ui version="4.0">
  <class>MainWindowDBMonitor</class>
  <widget class="QMainWindow" name="MainWindowDBMonitor">
-  <property name="windowModality">
-   <enum>Qt::NonModal</enum>
-  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -130,7 +127,7 @@
      <x>0</x>
      <y>0</y>
      <width>300</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
   </widget>

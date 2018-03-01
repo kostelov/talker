@@ -25,6 +25,10 @@ class User:
 
     @logg
     def presence(self):
+        """
+        Формируем сообщение приветствие
+        :return: сообщение (словарь)
+        """
         presence_msg = JimPresence(PRESENCE, self.login, time.time())
         return presence_msg.create()
 
