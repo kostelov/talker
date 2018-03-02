@@ -81,7 +81,9 @@ class Handler:
                 try:
                     # Получаем словарь
                     jmsg = Jim.from_dict(msg)
-                    if jmsg[ACTION] == GET_CONTACTS:
+                    if jmsg[ACTION] == MSG:
+                        send_message(sock, msg)
+                    elif jmsg[ACTION] == GET_CONTACTS:
                         # Извлекаем имя пользователя и передаем в запрос
                         contacts = self.repo.get_contacts(jmsg[USER])
                         # Получаем контакты и заносим в список
@@ -120,7 +122,6 @@ class Handler:
                             # Контакта нет, вызываем исключение
                             resp = JimResponse(WRONG_REQUEST, error='Контакт отсутствует')
                             send_message(sock, resp.to_dict())
-                    # send_message(sock, msg)
                 except:
                     # Сокет недоступен, клиент отключился
                     print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))

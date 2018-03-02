@@ -39,9 +39,9 @@ class User:
         :param text: текст сообщения
         :return: словарь
         """
-        data = (msg_to, self.login, text,)
+        # data = (msg_to, self.login, text,)
         msg = JimMessage()
-        return msg.create(data)
+        return msg.create(MSG, self.login, msg_to, text)
 
     def get_contacts(self):
         msg = JimGetContacts(self.login)
@@ -64,13 +64,13 @@ class User:
     def stop(self):
         self.sock.close()
 
-    def read_message(self):
+    def listener(self):
         print('Режим чтения...')
         while True:
             msg = get_message(self.sock)
             print(self.parsing(msg))
 
-    def write_message(self):
+    def speaker(self):
         print('Режим трансляции...')
         while True:
             text = input('>> ')
@@ -105,9 +105,9 @@ class User:
         return result_response
         # if result_response[CODE] == OK:
         #     if rw_mode == 'r':
-        #         self.read_message()
+        #         self.listener()
         #     if rw_mode == 'w':
-        #         self.write_message()
+        #         self.speaker()
         #     else:
         #         print(result_response[CODE], result_response[MESSAGE])
 
@@ -127,8 +127,8 @@ if __name__ == '__main__':
     try:
         mode = sys.argv[3]
     except IndexError:
-        mode = 'w'
+        mode = 'r'
 
     client = User('Nick')
     client.start()
-    client.read_message()
+    # client.speaker()

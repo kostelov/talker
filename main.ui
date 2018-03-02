@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>419</height>
+    <width>240</width>
+    <height>465</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>300</width>
-    <height>400</height>
+    <width>240</width>
+    <height>465</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>400</width>
-    <height>600</height>
+    <width>250</width>
+    <height>470</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -30,8 +30,8 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
-      <width>190</width>
+      <y>30</y>
+      <width>231</width>
       <height>371</height>
      </rect>
     </property>
@@ -58,7 +58,7 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>171</width>
+       <width>211</width>
        <height>341</height>
       </rect>
      </property>
@@ -67,8 +67,8 @@
    <widget class="QPushButton" name="pushButtonConnect">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>10</y>
+      <x>10</x>
+      <y>410</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -79,11 +79,11 @@
       <pointsize>10</pointsize>
      </font>
     </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::DefaultContextMenu</enum>
+    </property>
     <property name="text">
      <string>Подключиться</string>
-    </property>
-    <property name="checkable">
-     <bool>false</bool>
     </property>
     <property name="checked">
      <bool>false</bool>
@@ -95,8 +95,8 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>50</y>
+      <x>138</x>
+      <y>416</y>
       <width>91</width>
       <height>21</height>
      </rect>
@@ -105,7 +105,12 @@
      <font>
       <family>Courier</family>
       <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
      </font>
+    </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::ActionsContextMenu</enum>
     </property>
     <property name="frameShape">
      <enum>QFrame::Panel</enum>
@@ -123,20 +128,20 @@
    <widget class="QLineEdit" name="lineEditContactName">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>375</y>
-      <width>111</width>
-      <height>21</height>
+      <x>5</x>
+      <y>6</y>
+      <width>161</width>
+      <height>25</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButtonAddContact">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>375</y>
-      <width>26</width>
-      <height>23</height>
+      <x>176</x>
+      <y>6</y>
+      <width>25</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="font">
@@ -145,7 +150,11 @@
      </font>
     </property>
     <property name="text">
-     <string>+</string>
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>add_user.png</normaloff>add_user.png</iconset>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButtonDelContact">
@@ -154,10 +163,10 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>165</x>
-      <y>375</y>
-      <width>26</width>
-      <height>23</height>
+      <x>206</x>
+      <y>6</y>
+      <width>25</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="font">
@@ -166,7 +175,11 @@
      </font>
     </property>
     <property name="text">
-     <string>-</string>
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>del_user.png</normaloff>del_user.png</iconset>
     </property>
    </widget>
   </widget>
@@ -175,8 +188,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>320</width>
-     <height>18</height>
+     <width>240</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>

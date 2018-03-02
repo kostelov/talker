@@ -89,8 +89,21 @@ class JimPresence(Jim):
 class JimMessage():
 
     @staticmethod
-    def create(data):
-        message = {ACTION: MSG, TIME: nix_time.time(), TO: data[0], FROM: data[1], MESSAGE: data[2]}
+    def create(action, login, msg_to, text):
+        message = {
+            ACTION: None,
+            TIME: None,
+            USER: None,
+            TO: None,
+            CODE: None,
+            MESSAGE: None
+        }
+        # message = {ACTION: MSG, TIME: nix_time.time(), TO: data[0], FROM: data[1], MESSAGE: data[2]}
+        message[ACTION] = action
+        message[TIME] = nix_time.time()
+        message[USER] = login
+        message[TO] = msg_to
+        message[MESSAGE] = text
         return message
 
     @staticmethod
