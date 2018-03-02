@@ -20,8 +20,8 @@ class User:
 
     @logg
     def parsing(self, msg):
-        result = JimMessage()
-        return result.parsed(msg)
+        result = Jim()
+        return result.from_dict(msg)
 
     @logg
     def presence(self):
@@ -40,8 +40,8 @@ class User:
         :return: словарь
         """
         # data = (msg_to, self.login, text,)
-        msg = JimMessage()
-        return msg.create(MSG, self.login, msg_to, text)
+        msg = JimMessage(MSG, self.login, msg_to, text)
+        return msg.create()
 
     def get_contacts(self):
         msg = JimGetContacts(self.login)
@@ -68,7 +68,8 @@ class User:
         print('Режим чтения...')
         while True:
             msg = get_message(self.sock)
-            print(self.parsing(msg))
+            res = self.parsing(msg)
+            print(res[MESSAGE])
 
     def speaker(self):
         print('Режим трансляции...')

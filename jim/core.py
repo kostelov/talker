@@ -86,29 +86,24 @@ class JimPresence(Jim):
         return message
 
 
-class JimMessage():
+class JimMessage(Jim):
+    def __init__(self, action, login, msg_to, text, time=None):
+        self.action = action
+        self.login = login
+        self.to = msg_to
+        self.text = text
+        if time:
+            self.time = time
+        else:
+            self.time = nix_time.time()
 
-    @staticmethod
-    def create(action, login, msg_to, text):
-        message = {
-            ACTION: None,
-            TIME: None,
-            USER: None,
-            TO: None,
-            CODE: None,
-            MESSAGE: None
-        }
-        # message = {ACTION: MSG, TIME: nix_time.time(), TO: data[0], FROM: data[1], MESSAGE: data[2]}
-        message[ACTION] = action
+    def create(self):
+        message = super().to_dict()
+        message[ACTION] = self.action
         message[TIME] = nix_time.time()
-        message[USER] = login
-        message[TO] = msg_to
-        message[MESSAGE] = text
-        return message
-
-    @staticmethod
-    def parsed(dictmsg):
-        message = dictmsg[MESSAGE]
+        message[USER] = self.login
+        message[TO] = self.to
+        message[MESSAGE] = self.text
         return message
 
 
