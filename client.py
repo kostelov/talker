@@ -96,7 +96,7 @@ class User:
                 msg = self.prepare_message('#all', text)
                 send_message(self.sock, msg)
 
-    def start(self, rw_mode):
+    def start(self):
         self.sock = socket(AF_INET, SOCK_STREAM)
         self.sock.connect(self.host)
         send_message(self.sock, self.presence())
@@ -130,5 +130,5 @@ if __name__ == '__main__':
         mode = 'w'
 
     client = User('Nick')
-    client.start(mode)
-    client.write_message()
+    client.start()
+    client.read_message()

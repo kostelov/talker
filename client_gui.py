@@ -21,7 +21,7 @@ class ButtonConnect(ButtonList):
     def on_clicked(self):
         # Подключаемся к серверу и получаем данные
         if window.pushButtonConnect.text() == 'Подключиться':
-            client.start('w')
+            client.start()
             contacts = self.client.get_contacts()
             # Контакты выводим в список
             for contact in contacts:
