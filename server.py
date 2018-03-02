@@ -86,7 +86,7 @@ class Handler:
                         contacts = self.repo.get_contacts(jmsg[USER])
                         # Получаем контакты и заносим в список
                         contact_names = [contact.name for contact in contacts]
-                        # Все ОК, формируем ответ (список контакток помещаем в поле для сообщений) и отправляем
+                        # Все ОК, формируем ответ (список контактов помещаем в поле для сообщений) и отправляем
                         resp = JimResponse(OK, contact_names)
                         send_message(sock, resp.to_dict())
                     elif jmsg[ACTION] == ADD_CONTACT:
@@ -95,10 +95,10 @@ class Handler:
                         contact_name = jmsg[TO]
                         try:
                             if not self.repo.contact_exist(user_name, contact_name):
-                                # Добавляем в друзья пользователю контакт и наоборот
+                                # Добавляем в друзья пользователю контакт
                                 self.repo.add_contact(user_name, contact_name)
                                 # Все ОК, формируем ответ и отправляем
-                                resp = JimResponse(ACCEPTED)
+                                resp = JimResponse(ACCEPTED, 'Контакт добавлен')
                                 send_message(sock, resp.to_dict())
                             else:
                                 resp = JimResponse(WRONG_REQUEST, error='Контакт уже добавлен')
@@ -114,7 +114,7 @@ class Handler:
                             # Удаляем контакт из друзей пользователя
                             self.repo.del_contact(user_name, contact_name)
                             # Все ОК, формируем ответ и отправляем
-                            resp = JimResponse(ACCEPTED)
+                            resp = JimResponse(ACCEPTED, 'Контакт удален')
                             send_message(sock, resp.to_dict())
                         except UserDoesNotExist as e:
                             # Контакта нет, вызываем исключение

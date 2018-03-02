@@ -48,9 +48,11 @@ class ButtonAddContact(ButtonList):
         if contact_name:
             # Проверяем, что поле не пустое, отправляем запрос
             result = self.client.add_contact(contact_name)
-            if result[CODE] == OK:
+            if result[CODE] == ACCEPTED:
+                print(result[MESSAGE])
                 # Обновляем список контактов
                 window.listWidgetContact.addItem(contact_name)
+                window.lineEditContactName.clear()
             else:
                 print(result[MESSAGE])
         else:
@@ -64,12 +66,16 @@ class ButtonDelContact(ButtonList):
             contact_name = item.text()
             if contact_name:
                 # Удаляем контакт
-                self.client.del_contact(contact_name)
-                window.listWidgetContact.clear()
-                contacts = self.client.get_contacts()
-                # Повторно получаем контакты и выводим в список
-                for contact in contacts:
-                    window.listWidgetContact.addItem(contact)
+                result = self.client.del_contact(contact_name)
+                if result[CODE] == ACCEPTED:
+                    print(result[MESSAGE])
+                    window.listWidgetContact.clear()
+                    contacts = self.client.get_contacts()
+                    # Повторно получаем контакты и выводим в список
+                    for contact in contacts:
+                        window.listWidgetContact.addItem(contact)
+                else:
+                    print(result[MESSAGE])
         except Exception as e:
             print(e)
 

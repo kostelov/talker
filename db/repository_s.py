@@ -29,10 +29,9 @@ class Repository:
         if contact:
             user = self.get_user(user_name)
             if user:
-                # Добавляем пользователей в список контактов друг к другу
-                new_relation = [Contacts(user_id=user.uid, contact_id=contact.uid),
-                                Contacts(user_id=contact.uid, contact_id=user.uid)]
-                self.session.add_all(new_relation)
+                # Добавляем пользователя в список контактов
+                new_relation = Contacts(user_id=user.uid, contact_id=contact.uid)
+                self.session.add(new_relation)
                 self.session.commit()
             else:
                 raise UserDoesNotExist(user)

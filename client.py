@@ -68,36 +68,33 @@ class User:
         print('Режим чтения...')
         while True:
             msg = get_message(self.sock)
-            # print(msg)
             print(self.parsing(msg))
 
     def write_message(self):
         print('Режим трансляции...')
         while True:
             text = input('>> ')
-            if text == 'list':
+            if text.startswith('list'):
                 print('Список контактов:')
                 for items in self.get_contacts():
                     print(items)
             elif text == QUIT:
                 break
-            else:
-                command, param = text.split()
-                if command == 'add':
-                    response = self.add_contact(param)
+            elif text.startswith('add'):
+                    response = self.add_contact(text.split()[1])
                     if response[CODE] == ACCEPTED:
                         print('Контакт добавлен')
                     else:
                         print(response[MESSAGE])
-                elif command == 'del':
-                    response = self.del_contact(param)
-                    if response[CODE] == ACCEPTED:
-                        print('Контакт удален')
-                    else:
-                        print(response[MESSAGE])
-            # else:
-            #     msg = self.prepare_message('#all', text)
-            #     send_message(self.sock, msg)
+            elif text.startswith('del'):
+                response = self.del_contact(text.split()[1])
+                if response[CODE] == ACCEPTED:
+                    print('Контакт удален')
+                else:
+                    print(response[MESSAGE])
+            else:
+                msg = self.prepare_message('#all', text)
+                send_message(self.sock, msg)
 
     def start(self, rw_mode):
         self.sock = socket(AF_INET, SOCK_STREAM)
