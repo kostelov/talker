@@ -35,15 +35,16 @@ class User:
         presence_msg = JimPresence(PRESENCE, self.login, time.time())
         return presence_msg.create()
 
-    def prepare_message(self, msg_to, text):
+    def prepare_message(self, action, text=None, msg_to=None, ):
         """
         Подготовка сообщения для отправки на сервер
+        :param action: тип отправляемого сообщения
         :param msg_to: получатель
         :param text: текст сообщения
         :return: словарь
         """
         # data = (msg_to, self.login, text,)
-        msg = JimMessage(MSG, self.login, msg_to, text)
+        msg = JimMessage(action, self.login, msg_to, text)
         return msg.create()
 
     def get_contacts(self):
@@ -72,6 +73,7 @@ class User:
         print('Режим чтения...')
         while True:
             if not self.is_alive:
+                self.stop()
                 break
             msg = get_message(self.sock)
             res = self.parsing(msg)
@@ -80,10 +82,10 @@ class User:
     def speaker(self):
         """
          Принимает сообщение пользователя
-         формирует корректное сообщение (доделать, убрать вызов get_, add_, del_contact)
-         отправляет
+         формирует корректное сообщение, отправляет
         :return:
         """
+        msg = {}
         self.is_alive = True
         print('Режим трансляции...')
         while True:
@@ -91,27 +93,16 @@ class User:
                 break
             text = input('\n<< ')
             if text.startswith('list'):
-                print('Список контактов:')
-                self.get_contacts()
-                for items in self.get_contacts():
-                    print(items)
-            elif text == QUIT:
-                break
+                msg = self.prepare_message(GET_CONTACTS)
+            elif text.startswith('quit'):
+                self.stop()
             elif text.startswith('add'):
-                    response = self.add_contact(text.split()[1])
-                    if response[CODE] == ACCEPTED:
-                        print('Контакт добавлен')
-                    else:
-                        print(response[MESSAGE])
+                msg = self.prepare_message(ADD_CONTACT, None, text.split()[1])
             elif text.startswith('del'):
-                response = self.del_contact(text.split()[1])
-                if response[CODE] == ACCEPTED:
-                    print('Контакт удален')
-                else:
-                    print(response[MESSAGE])
+                msg = self.prepare_message(DEL_CONTACT, None, text.split()[1])
             else:
-                msg = self.prepare_message('#all', text)
-                send_message(self.sock, msg)
+                msg = self.prepare_message(MSG, text)
+            send_message(self.sock, msg)
 
     def start(self):
         self.sock = socket(AF_INET, SOCK_STREAM)

@@ -87,10 +87,10 @@ class JimPresence(Jim):
 
 
 class JimMessage(Jim):
-    def __init__(self, action, login, msg_to, text, time=None):
+    def __init__(self, action, login, contact_name=None, text=None, time=None):
         self.action = action
         self.login = login
-        self.to = msg_to
+        self.contact = contact_name
         self.text = text
         if time:
             self.time = time
@@ -102,7 +102,7 @@ class JimMessage(Jim):
         message[ACTION] = self.action
         message[TIME] = nix_time.time()
         message[USER] = self.login
-        message[TO] = self.to
+        message[TO] = self.contact
         message[MESSAGE] = self.text
         return message
 
