@@ -8,6 +8,8 @@ from jim.config import *
 import log.client_log_config
 from log.loger import Log
 
+from threading import Thread
+
 logger = logging.getLogger('client')
 logg = Log(logger)
 
@@ -17,6 +19,7 @@ class User:
     def __init__(self, login):
         self.login = login
         self.host = ('localhost', 7777)
+        self.is_alive = False
 
     @logg
     def parsing(self, msg):
@@ -65,18 +68,31 @@ class User:
         self.sock.close()
 
     def listener(self):
+        self.is_alive = True
         print('Режим чтения...')
         while True:
+            if not self.is_alive:
+                break
             msg = get_message(self.sock)
             res = self.parsing(msg)
-            print(res[MESSAGE])
+            print('>> ', res[MESSAGE])
 
     def speaker(self):
+        """
+         Принимает сообщение пользователя
+         формирует корректное сообщение (доделать, убрать вызов get_, add_, del_contact)
+         отправляет
+        :return:
+        """
+        self.is_alive = True
         print('Режим трансляции...')
         while True:
-            text = input('>> ')
+            if not self.is_alive:
+                break
+            text = input('\n<< ')
             if text.startswith('list'):
                 print('Список контактов:')
+                self.get_contacts()
                 for items in self.get_contacts():
                     print(items)
             elif text == QUIT:
@@ -103,8 +119,24 @@ class User:
         send_message(self.sock, self.presence())
         response_msg = get_message(self.sock)
         result_response = Jim.from_dict(response_msg)
-        return result_response
-        # if result_response[CODE] == OK:
+        # return result_response
+        if result_response[CODE] == OK:
+            thread_listen = Thread(target=self.listener)
+            thread_listen.daemon = True
+
+            thread_speak = Thread(target=self.speaker)
+            thread_speak.daemon = True
+
+            thread_listen.start()
+            thread_speak.start()
+
+            while True:
+                if not thread_listen.is_alive:
+                    break
+                if not thread_speak.is_alive:
+                    break
+
+            self.stop()
         #     if rw_mode == 'r':
         #         self.listener()
         #     if rw_mode == 'w':
