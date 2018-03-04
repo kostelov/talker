@@ -8,7 +8,7 @@ from jim.config import *
 import log.client_log_config
 from log.loger import Log
 
-from threading import Thread
+from queue import Queue
 
 logger = logging.getLogger('client')
 logg = Log(logger)
@@ -19,7 +19,8 @@ class User:
     def __init__(self, login):
         self.login = login
         self.host = ('localhost', 7777)
-        self.is_alive = False
+        # self.is_alive = False
+        self.request_queue = Queue()
 
     @logg
     def parsing(self, msg):
@@ -35,7 +36,7 @@ class User:
         presence_msg = JimPresence(PRESENCE, self.login, time.time())
         return presence_msg.create()
 
-    def prepare_message(self, action, text=None, msg_to=None, ):
+    def prepare_message(self, action, msg_to=None, text=None):
         """
         Подготовка сообщения для отправки на сервер
         :param action: тип отправляемого сообщения
@@ -68,41 +69,41 @@ class User:
     def stop(self):
         self.sock.close()
 
-    def listener(self):
-        self.is_alive = True
-        print('Режим чтения...')
-        while True:
-            if not self.is_alive:
-                self.stop()
-                break
-            msg = get_message(self.sock)
-            res = self.parsing(msg)
-            print('>> ', res[MESSAGE])
-
-    def speaker(self):
-        """
-         Принимает сообщение пользователя
-         формирует корректное сообщение, отправляет
-        :return:
-        """
-        msg = {}
-        self.is_alive = True
-        print('Режим трансляции...')
-        while True:
-            if not self.is_alive:
-                break
-            text = input('\n<< ')
-            if text.startswith('list'):
-                msg = self.prepare_message(GET_CONTACTS)
-            elif text.startswith('quit'):
-                self.stop()
-            elif text.startswith('add'):
-                msg = self.prepare_message(ADD_CONTACT, None, text.split()[1])
-            elif text.startswith('del'):
-                msg = self.prepare_message(DEL_CONTACT, None, text.split()[1])
-            else:
-                msg = self.prepare_message(MSG, text)
-            send_message(self.sock, msg)
+    # def listener(self):
+    #     self.is_alive = True
+    #     print('Режим чтения...')
+    #     while True:
+    #         if not self.is_alive:
+    #             self.stop()
+    #             break
+    #         msg = get_message(self.sock)
+    #         res = self.parsing(msg)
+    #         print('>> ', res[MESSAGE])
+    #
+    # def speaker(self):
+    #     """
+    #      Принимает сообщение пользователя
+    #      формирует корректное сообщение, отправляет
+    #     :return:
+    #     """
+    #     msg = {}
+    #     self.is_alive = True
+    #     print('Режим трансляции...')
+    #     while True:
+    #         if not self.is_alive:
+    #             break
+    #         text = input('\n<< ')
+    #         if text.startswith('list'):
+    #             msg = self.prepare_message(GET_CONTACTS)
+    #         elif text.startswith('quit'):
+    #             self.stop()
+    #         elif text.startswith('add'):
+    #             msg = self.prepare_message(ADD_CONTACT, None, text.split()[1])
+    #         elif text.startswith('del'):
+    #             msg = self.prepare_message(DEL_CONTACT, None, text.split()[1])
+    #         else:
+    #             msg = self.prepare_message(MSG, text)
+    #         send_message(self.sock, msg)
 
     def start(self):
         self.sock = socket(AF_INET, SOCK_STREAM)
@@ -110,24 +111,24 @@ class User:
         send_message(self.sock, self.presence())
         response_msg = get_message(self.sock)
         result_response = Jim.from_dict(response_msg)
-        # return result_response
-        if result_response[CODE] == OK:
-            thread_listen = Thread(target=self.listener)
-            thread_listen.daemon = True
-
-            thread_speak = Thread(target=self.speaker)
-            thread_speak.daemon = True
-
-            thread_listen.start()
-            thread_speak.start()
-
-            while True:
-                if not thread_listen.is_alive:
-                    break
-                if not thread_speak.is_alive:
-                    break
-
-            self.stop()
+        return result_response
+        # if result_response[CODE] == OK:
+        #     thread_listen = Thread(target=self.listener)
+        #     thread_listen.daemon = True
+        #
+        #     thread_speak = Thread(target=self.speaker)
+        #     thread_speak.daemon = True
+        #
+        #     thread_listen.start()
+        #     thread_speak.start()
+        #
+        #     while True:
+        #         if not thread_listen.is_alive:
+        #             break
+        #         if not thread_speak.is_alive:
+        #             break
+        #
+        #     self.stop()
         #     if rw_mode == 'r':
         #         self.listener()
         #     if rw_mode == 'w':
