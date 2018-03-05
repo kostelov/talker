@@ -21,6 +21,7 @@ class User:
         self.host = ('localhost', 7777)
         # self.is_alive = False
         self.request_queue = Queue()
+        self.response_queue = Queue()
 
     @logg
     def parsing(self, msg):
