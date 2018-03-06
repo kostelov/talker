@@ -45,7 +45,7 @@ class Handler:
             return response.to_dict()
         else:
             response = JimResponse(OK)
-            return response.to_dict()
+            return response.to_dict(), user
 
     @logg
     def request(self, r_clients, all_clients):
@@ -60,7 +60,7 @@ class Handler:
         for sock in r_clients:
             try:
                 msg = get_message(sock)
-                messages.append(msg)
+                messages.append((msg, sock))
                 # requests[sock] = msg
             except:
                 print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
@@ -68,7 +68,7 @@ class Handler:
         return messages # requests
 
     @logg
-    def response(self, messages, w_clients, all_clients):
+    def response(self, messages, names, all_clients):
         """
         Эхо-ответ сервера клиентам, от которых были запросы
         :param requests: {сокет: запрос}
@@ -76,57 +76,59 @@ class Handler:
         :param all_clientts: список всех клиентов
         :return: None
         """
-        for sock in w_clients:
-            for msg in messages:
-                try:
-                    # Получаем словарь
-                    jmsg = Jim.from_dict(msg)
-                    if jmsg[ACTION] == MSG:
-                        send_message(sock, msg)
-                    elif jmsg[ACTION] == GET_CONTACTS:
-                        # Извлекаем имя пользователя и передаем в запрос
-                        contacts = self.repo.get_contacts(jmsg[USER])
-                        # Получаем контакты и заносим в список
-                        contact_names = [contact.name for contact in contacts]
-                        # Все ОК, формируем ответ (список контактов помещаем в поле для сообщений) и отправляем
-                        resp = JimResponse(OK, contact_names)
-                        send_message(sock, resp.to_dict())
-                    elif jmsg[ACTION] == ADD_CONTACT:
-                        # Извлекам пользователя и контакт
-                        user_name = jmsg[USER]
-                        contact_name = jmsg[TO]
-                        try:
-                            if not self.repo.contact_exist(user_name, contact_name):
-                                # Добавляем в друзья пользователю контакт
-                                self.repo.add_contact(user_name, contact_name)
-                                # Все ОК, формируем ответ и отправляем
-                                resp = JimResponse(ACCEPTED, 'Контакт добавлен')
-                                send_message(sock, resp.to_dict())
-                            else:
-                                resp = JimResponse(WRONG_REQUEST, error='Контакт уже добавлен')
-                                send_message(sock, resp.to_dict())
-                        except UserDoesNotExist as e:
-                            resp = JimResponse(WRONG_REQUEST, error='Контакт отсутствует')
-                            send_message(sock, resp.to_dict())
-                    elif jmsg[ACTION] == DEL_CONTACT:
-                        # Извлекам пользователя и контакт
-                        user_name = jmsg[USER]
-                        contact_name = jmsg[TO]
-                        try:
-                            # Удаляем контакт из друзей пользователя
-                            self.repo.del_contact(user_name, contact_name)
+        # for sock in w_clients:
+        for msg, sock in messages:
+            try:
+                # Получаем словарь
+                jmsg = Jim.from_dict(msg)
+                if jmsg[ACTION] == MSG:
+                    to = jmsg[TO]
+                    contact_sock = names[to]
+                    send_message(contact_sock, msg)
+                elif jmsg[ACTION] == GET_CONTACTS:
+                    # Извлекаем имя пользователя и передаем в запрос
+                    contacts = self.repo.get_contacts(jmsg[USER])
+                    # Получаем контакты и заносим в список
+                    contact_names = [contact.name for contact in contacts]
+                    # Все ОК, формируем ответ (список контактов помещаем в поле для сообщений) и отправляем
+                    resp = JimResponse(OK, contact_names)
+                    send_message(sock, resp.to_dict())
+                elif jmsg[ACTION] == ADD_CONTACT:
+                    # Извлекам пользователя и контакт
+                    user_name = jmsg[USER]
+                    contact_name = jmsg[TO]
+                    try:
+                        if not self.repo.contact_exist(user_name, contact_name):
+                            # Добавляем в друзья пользователю контакт
+                            self.repo.add_contact(user_name, contact_name)
                             # Все ОК, формируем ответ и отправляем
-                            resp = JimResponse(ACCEPTED, 'Контакт удален')
+                            resp = JimResponse(ACCEPTED, 'Контакт добавлен')
                             send_message(sock, resp.to_dict())
-                        except UserDoesNotExist as e:
-                            # Контакта нет, вызываем исключение
-                            resp = JimResponse(WRONG_REQUEST, error='Контакт отсутствует')
+                        else:
+                            resp = JimResponse(WRONG_REQUEST, error='Контакт уже добавлен')
                             send_message(sock, resp.to_dict())
-                except:
-                    # Сокет недоступен, клиент отключился
-                    print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
-                    sock.close()
-                    all_clients.remove(sock)
+                    except UserDoesNotExist as e:
+                        resp = JimResponse(WRONG_REQUEST, error='Контакт отсутствует')
+                        send_message(sock, resp.to_dict())
+                elif jmsg[ACTION] == DEL_CONTACT:
+                    # Извлекам пользователя и контакт
+                    user_name = jmsg[USER]
+                    contact_name = jmsg[TO]
+                    try:
+                        # Удаляем контакт из друзей пользователя
+                        self.repo.del_contact(user_name, contact_name)
+                        # Все ОК, формируем ответ и отправляем
+                        resp = JimResponse(ACCEPTED, 'Контакт удален')
+                        send_message(sock, resp.to_dict())
+                    except UserDoesNotExist as e:
+                        # Контакта нет, вызываем исключение
+                        resp = JimResponse(WRONG_REQUEST, error='Контакт отсутствует')
+                        send_message(sock, resp.to_dict())
+            except:
+                # Сокет недоступен, клиент отключился
+                print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
+                sock.close()
+                all_clients.remove(sock)
 
 
 class Server:
@@ -142,6 +144,8 @@ class Server:
         self.host = (address, port)
         # Список клиентов
         self.clients = []
+        # Словарь из имени клиента и его сокета
+        self.names = {}
         self.sock = socket(AF_INET, SOCK_STREAM)
         self.sock.bind((address, port))
         self.sock.listen(5)
@@ -154,7 +158,7 @@ class Server:
             try:
                 conn, adr = self.sock.accept()
                 presence = get_message(conn)
-                response = self.handler.greet(presence)
+                response, name = self.handler.greet(presence)
                 send_message(conn, response)
             except OSError:
                 # Время ожидания вышло
@@ -163,6 +167,8 @@ class Server:
                 print('Получен запрос на соединение от {}'.format(adr))
                 # Клиент подключился - добавляем его в список
                 self.clients.append(conn)
+                #
+                self.names[name] = conn
             finally:
                 timeout = 0
                 r = []
@@ -178,7 +184,7 @@ class Server:
                     pass
 
                 requests = self.handler.request(r, self.clients)
-                self.handler.response(requests, w, self.clients)
+                self.handler.response(requests, self.names, self.clients)
 
 
 if __name__ == '__main__':

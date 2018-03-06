@@ -32,11 +32,15 @@ class Sender:
         while True:
             if not self.is_alive:
                 break
+            text = input('<< ')
+            if text.startswith('quit'):
+                self.is_alive = False
+                self.is_alive = False
             # Получаем запрос/сообщение из очереди
-            data = self.response_queue.get()
-            self.response_queue.task_done()
+            # data = self.response_queue.get()
+            # self.response_queue.task_done()
             # Отправляем на обработку
-            msg = self.process_message(data)
+            msg = self.process_message(text)
             if isinstance(msg, dict):
                 # Отправляем на сервер
                 send_message(self.sock, msg)
@@ -82,10 +86,10 @@ class Receiver:
             #     self.stop()
             # else:
             # Кладем в очередь
-            #     self.request_queue.put(data)
+            # self.request_queue.put(data)
             # else:
-            data = self.process_message(data)
-            self.request_queue.put(data)
+            self.process_message(data)
+            # self.request_queue.put(data)
 
     def stop(self):
         self.request_queue.put(None)
@@ -97,7 +101,7 @@ class ConsoleReceiver(Receiver):
 
     def process_message(self, message):
         print('>> {}: {}'.format(message[USER], message[MESSAGE]))
-        return self.prepare_message(MSG, message[TO], message[USER], '+')
+        # return self.prepare_message(MSG, message[TO], message[USER], '+')
 
 
 class ConsoleSender(Sender):
@@ -113,7 +117,9 @@ class ConsoleSender(Sender):
         elif text.startswith('del'):
             msg = self.prepare_message(DEL_CONTACT, self.login, text.split()[1], None)
         elif text.startswith('msg'):
-            msg = self.prepare_message(MSG, self.login, text.split()[1], text)
+            contact_name = text.split()[1]
+            num = len(text.split()[0] + text.split()[1]) + 2
+            msg = self.prepare_message(MSG, self.login, contact_name, text[num:])
         else:
             msg = self.prepare_message(MSG, self.login, None, 'Не верный формат сообщения')
         return msg
