@@ -11,6 +11,19 @@ class Sender:
         self.is_alive = False
         self.login = login
 
+    def prepare_message(self, action, login, msg_to=None, text=None):
+        """
+        Подготовка сообщения для отправки на сервер
+        :param action: тип отправляемого сообщения
+        :param login: отправитель
+        :param msg_to: получатель
+        :param text: текст сообщения
+        :return: словарь
+        """
+        # data = (msg_to, self.login, text,)
+        msg = JimMessage(action, login, msg_to, text)
+        return msg.create()
+
     def process_message(self, text):
         pass
 
@@ -44,37 +57,6 @@ class Receiver:
     def process_message(self, message):
         pass
 
-    def pull(self):
-        self.is_alive = True
-        while True:
-            if not self.is_alive:
-                break
-            # Получаем ответ сервера
-            data = get_message(self.sock)
-            # data = self.request_queue.get()
-            # if data[ACTION] == QUIT:
-            #     self.stop()
-            # else:
-            # Кладем в очередь
-            self.request_queue.put(data)
-            # self.process_message(data)
-            # else:
-            #     self.request_queue.put(data)
-
-    def stop(self):
-        self.request_queue.put(None)
-        self.request_queue.join()
-        self.is_alive = False
-
-
-class ConsoleReceiver(Receiver):
-
-    def process_message(self, message):
-        print('\n>> {}'.format(message[MESSAGE]))
-
-
-class ConsoleSender(Sender):
-
     def prepare_message(self, action, login, msg_to=None, text=None):
         """
         Подготовка сообщения для отправки на сервер
@@ -88,16 +70,50 @@ class ConsoleSender(Sender):
         msg = JimMessage(action, login, msg_to, text)
         return msg.create()
 
+    def pull(self):
+        self.is_alive = True
+        while True:
+            if not self.is_alive:
+                break
+            # Получаем ответ сервера
+            data = get_message(self.sock)
+            # data = self.request_queue.get()
+            # if data[ACTION] == GET_CONTACTS:
+            #     self.stop()
+            # else:
+            # Кладем в очередь
+            #     self.request_queue.put(data)
+            # else:
+            data = self.process_message(data)
+            self.request_queue.put(data)
+
+    def stop(self):
+        self.request_queue.put(None)
+        self.request_queue.join()
+        self.is_alive = False
+
+
+class ConsoleReceiver(Receiver):
+
+    def process_message(self, message):
+        print('>> {}: {}'.format(message[USER], message[MESSAGE]))
+        return self.prepare_message(MSG, message[TO], message[USER], '+')
+
+
+class ConsoleSender(Sender):
+
     def process_message(self, text):
         # text = input('<< ')
         if text.startswith('list'):
             msg = self.prepare_message(GET_CONTACTS, self.login)
-        # elif text.startswith('quit'):
-        #     msg = self.prepare_message(QUIT, self.login)
+        elif text.startswith('quit'):
+            msg = self.prepare_message(MSG, self.login, None, 'Ушел')
         elif text.startswith('add'):
             msg = self.prepare_message(ADD_CONTACT, self.login, text.split()[1], None)
         elif text.startswith('del'):
             msg = self.prepare_message(DEL_CONTACT, self.login, text.split()[1], None)
+        elif text.startswith('msg'):
+            msg = self.prepare_message(MSG, self.login, text.split()[1], text)
         else:
-            msg = self.prepare_message(MSG, self.login, None, text)
+            msg = self.prepare_message(MSG, self.login, None, 'Не верный формат сообщения')
         return msg

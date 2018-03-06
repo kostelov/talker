@@ -27,9 +27,9 @@ while True:
     # Забираем ответ из очереди
     response = client.request_queue.get()
     client.request_queue.task_done()
-    # Разбираем и выводим
-    message = client.parsing(response)
-    print('>> {}: {}'.format(message[USER], message[MESSAGE]))
+    # Выводим сообщение
+    # message = client.parsing(response)
+    print('>> ', response[MESSAGE])
     if not thread_listener.is_alive:
         break
     if not thread_speaker.is_alive:
