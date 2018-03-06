@@ -16,10 +16,13 @@ logg = Log(logger)
 
 class User:
 
-    def __init__(self, login):
+    def __init__(self, login, addr=None, port=None):
         self.login = login
-        self.host = ('localhost', 7777)
-        # self.is_alive = False
+        if not addr:
+            host = 'localhost'
+        if not port:
+            port = 7777
+        self.host = (host, port)
         self.receiver_queue = Queue()
         self.sender_queue = Queue()
 
@@ -52,24 +55,30 @@ class User:
     def get_contacts(self):
         msg = JimGetContacts(self.login)
         send_message(self.sock, msg.to_dict())
-        response = get_message(self.sock)
+        # response = get_message(self.sock)
+        response = self.receiver_queue.get()
         return response[MESSAGE]
 
     def add_contact(self, contact_name):
         msg = JimAddContact(self.login, contact_name)
         send_message(self.sock, msg.to_dict())
-        response = get_message(self.sock)
+        # response = get_message(self.sock)
+        response = self.receiver_queue.get()
         return response
 
     def del_contact(self, contact_name):
         msg = JimDelContact(self.login, contact_name)
         send_message(self.sock, msg.to_dict())
-        response = get_message(self.sock)
+        # response = get_message(self.sock)
+        response = self.receiver_queue.get()
         return response
 
     def stop(self):
         self.sock.close()
 
+    def message_send(self, msg_to, text):
+        msg = self.prepare_message(MSG, msg_to, text)
+        send_message(self.sock, msg)
     # def listener(self):
     #     self.is_alive = True
     #     print('Режим чтения...')

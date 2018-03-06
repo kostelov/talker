@@ -1,7 +1,9 @@
 from PyQt5 import QtWidgets, uic
+from PyQt5.QtCore import QThread, pyqtSlot
 import sys
 from client import User
 from jim.config import *
+from handler import GuiReceiver
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -15,30 +17,6 @@ class ButtonList:
     """ Общий класс кнопки для работы со списком контактов """
     def __init__(self):
         self.client = client
-
-
-class ButtonConnect(ButtonList):
-    def on_clicked(self):
-        # Подключаемся к серверу и получаем данные
-        if window.pushButtonConnect.text() == 'Подключиться':
-            self.client.start()
-            contacts = self.client.get_contacts()
-            # Контакты выводим в список
-            for contact in contacts:
-                window.listWidgetContact.addItem(contact)
-            # Меняем состояние кнопок
-            window.pushButtonConnect.setText('Отключиться')
-            window.labelStatus.setText('В сети')
-            window.pushButtonAddContact.setEnabled(True)
-            window.pushButtonDelContact.setEnabled(True)
-        elif window.pushButtonConnect.text() == 'Отключиться':
-            # Меняем состояние кнопок, отключаемся, чистим список
-            window.pushButtonConnect.setText('Подключиться')
-            window.labelStatus.setText('Не в сети')
-            window.pushButtonAddContact.setEnabled(False)
-            window.pushButtonDelContact.setEnabled(False)
-            window.listWidgetContact.clear()
-            self.client.stop()
 
 
 class ButtonAddContact(ButtonList):
@@ -57,6 +35,7 @@ class ButtonAddContact(ButtonList):
                 print(result[MESSAGE])
         else:
             print('Укажите имя контакта')
+
 
 class ButtonDelContact(ButtonList):
     def on_clicked(self):
@@ -80,18 +59,51 @@ class ButtonDelContact(ButtonList):
             print(e)
 
 
+class ButtonSend:
+    def on_clicked(self):
+        text = window.plainTextEditMsg.toPlainText()
+        if text:
+            try:
+                contact_name = window.listWidgetContact.currentItem().text()
+                client.message_send(contact_name, text)
+                msg = '{} << '.format(text)
+                window.listWidgetChat.addItem(msg)
+            except Exception as e:
+                print(e)
+
+
+class ChatList:
+
+    @pyqtSlot(str)
+    def update_chat(text):
+        try:
+            window.listWidgetChat.addItem(text)
+        except Exception as e:
+            print(e)
+
+
 if __name__ == '__main__':
     login = 'Nick'
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
     client = User(login)
-    btn_connect = ButtonConnect()
+    client.start()
+    listener = GuiReceiver(client.sock, client.receiver_queue)
+    thread_gui = QThread()
+    listener.moveToThread(thread_gui)
+    thread_gui.started.connect(listener.pull)
+    thread_gui.start()
+    contacts = client.get_contacts()
+    # Контакты выводим в список
+    for contact in contacts:
+        window.listWidgetContact.addItem(contact)
     btn_add = ButtonAddContact()
     btn_del = ButtonDelContact()
-    window.pushButtonConnect.clicked.connect(btn_connect.on_clicked)
-    window.pushButtonAddContact.setEnabled(False)
-    window.pushButtonDelContact.setEnabled(False)
+    btn_send = ButtonSend()
+    chat = ChatList()
     window.pushButtonAddContact.clicked.connect(btn_add.on_clicked)
     window.pushButtonDelContact.clicked.connect(btn_del.on_clicked)
+    window.pushButtonSend.clicked.connect(btn_send.on_clicked)
+    listener.gotData.connect(chat.update_chat) # TypeError: connect() failed between GuiReceiver.gotData[str] and update_chat()
     window.show()
     sys.exit(app.exec_())

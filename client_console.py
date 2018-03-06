@@ -17,7 +17,7 @@ except ValueError:
 try:
     name = sys.argv[3]
 except IndexError:
-    name = 'Nick'
+    name = 'Leo'
 
 client = User(name)
 client.start()
@@ -49,6 +49,7 @@ while True:
         elif text.startswith('del'):
             msg = client.prepare_message(DEL_CONTACT, text.split()[1], None)
         elif text.startswith('msg'):
+            # Делим сообщение на команду, имя и содержимое
             contact_name = text.split()[1]
             num = len(text.split()[0] + text.split()[1]) + 2
             msg = client.prepare_message(MSG, contact_name, text[num:])

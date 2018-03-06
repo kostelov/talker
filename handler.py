@@ -1,11 +1,11 @@
 from jim.event import get_message, send_message
 from jim.config import *
-from jim.core import JimMessage
+from PyQt5.QtCore import QObject, pyqtSignal
 
 
 class Sender:
     """ Класс отправки сообщений """
-    def __init__(self, sock, login, sender_queue=None):
+    def __init__(self, sock, login, sender_queue):
         self.sock = sock
         self.sender_queue = sender_queue
         self.is_alive = False
@@ -33,7 +33,7 @@ class Sender:
 
 class Receiver:
     """ Класс получения сообщений """
-    def __init__(self, sock, receiver_queue=None):
+    def __init__(self, sock, receiver_queue):
         self.sock = sock
         self.receiver_queue = receiver_queue
         self.is_alive = False
@@ -48,7 +48,10 @@ class Receiver:
                 break
             # Получаем ответ сервера
             data = get_message(self.sock)
-            self.process_message(data)
+            if data[ACTION] == RESPONSE :
+                self.receiver_queue.put(data)
+            else:
+                self.process_message(data)
 
     def stop(self):
         self.receiver_queue.put(None)
@@ -63,3 +66,23 @@ class ConsoleReceiver(Receiver):
             print('\n>> {}: {}'.format(message[USER], message[MESSAGE]))
         else:
             print('\n>> {}'.format(message[MESSAGE]))
+
+
+class GuiReceiver(Receiver, QObject):
+    gotData = pyqtSignal(str)
+    finished = pyqtSignal(int)
+
+    def __init__(self, sock, receiver_queue):
+        # инициализируем как Receiver
+        Receiver.__init__(self, sock, receiver_queue)
+        # инициализируем как QObject
+        QObject.__init__(self)
+
+    def process_message(self, message):
+        text = '{} >> {}'.format(message[USER], message[MESSAGE])
+        print(text)
+        self.gotData.emit(text)
+
+    def pull(self):
+        super().pull()
+        self.finished.emit(0)
