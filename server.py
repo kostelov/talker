@@ -83,6 +83,7 @@ class Handler:
                 jmsg = Jim.from_dict(msg)
                 if jmsg[ACTION] == MSG:
                     to = jmsg[TO]
+                    # Достаем из словаря сокет по имени клиента
                     contact_sock = names[to]
                     send_message(contact_sock, msg)
                 elif jmsg[ACTION] == GET_CONTACTS:
@@ -167,7 +168,7 @@ class Server:
                 print('Получен запрос на соединение от {}'.format(adr))
                 # Клиент подключился - добавляем его в список
                 self.clients.append(conn)
-                #
+                # Связываем имя клиента и его сокет
                 self.names[name] = conn
             finally:
                 timeout = 0

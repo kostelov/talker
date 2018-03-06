@@ -20,8 +20,8 @@ class User:
         self.login = login
         self.host = ('localhost', 7777)
         # self.is_alive = False
-        self.request_queue = Queue()
-        self.response_queue = Queue()
+        self.receiver_queue = Queue()
+        self.sender_queue = Queue()
 
     @logg
     def parsing(self, msg):
