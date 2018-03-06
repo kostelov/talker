@@ -19,6 +19,9 @@ thread_speaker.start()
 while True:
     # Получаем запрос/текст от пользователя
     text = input('<< ')
+    if text.startswith('quit'):
+        thread_listener.is_alive = False
+        thread_speaker.is_alive = False
     # Кладем в очередь для отправки на сервер
     client.response_queue.put(text)
     # Забираем ответ из очереди
@@ -26,7 +29,7 @@ while True:
     client.request_queue.task_done()
     # Разбираем и выводим
     message = client.parsing(response)
-    print('>> ', message[MESSAGE])
+    print('>> {}: {}'.format(message[USER], message[MESSAGE]))
     if not thread_listener.is_alive:
         break
     if not thread_speaker.is_alive:

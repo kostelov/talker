@@ -92,8 +92,8 @@ class ConsoleSender(Sender):
         # text = input('<< ')
         if text.startswith('list'):
             msg = self.prepare_message(GET_CONTACTS, self.login)
-        elif text.startswith('quit'):
-            msg = self.prepare_message(QUIT, self.login)
+        # elif text.startswith('quit'):
+        #     msg = self.prepare_message(QUIT, self.login)
         elif text.startswith('add'):
             msg = self.prepare_message(ADD_CONTACT, self.login, text.split()[1], None)
         elif text.startswith('del'):
