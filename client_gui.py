@@ -12,6 +12,13 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QWidget.__init__(self, parent)
         uic.loadUi('main.ui', self)
 
+    @pyqtSlot(str)
+    def update_chat(self, text):
+        try:
+            window.listWidgetChat.addItem(text)
+        except Exception as e:
+            print(e)
+
 
 class ButtonList:
     """ Общий класс кнопки для работы со списком контактов """
@@ -66,6 +73,7 @@ class ButtonSend:
             try:
                 contact_name = window.listWidgetContact.currentItem().text()
                 client.message_send(contact_name, text)
+                window.plainTextEditMsg.clear()
                 msg = '{} << '.format(text)
                 window.listWidgetChat.addItem(msg)
             except Exception as e:
@@ -74,12 +82,12 @@ class ButtonSend:
 
 # class ChatList:
 
-@pyqtSlot(str)
-def update_chat(text):
-    try:
-        window.listWidgetChat.addItem(text)
-    except Exception as e:
-        print(e)
+# @pyqtSlot(str)
+# def update_chat(text):
+#     try:
+#         window.listWidgetChat.addItem(text)
+#     except Exception as e:
+#         print(e)
 
 
 if __name__ == '__main__':
@@ -89,8 +97,7 @@ if __name__ == '__main__':
     client = User(login)
     client.start()
     listener = GuiReceiver(client.sock, client.receiver_queue)
-    # chat = ChatList()
-    listener.gotData.connect(update_chat)
+    listener.gotData.connect(window.update_chat)
     thread_gui = QThread()
     listener.moveToThread(thread_gui)
     thread_gui.started.connect(listener.pull)
@@ -105,6 +112,5 @@ if __name__ == '__main__':
     window.pushButtonAddContact.clicked.connect(btn_add.on_clicked)
     window.pushButtonDelContact.clicked.connect(btn_del.on_clicked)
     window.pushButtonSend.clicked.connect(btn_send.on_clicked)
-     # TypeError: connect() failed between GuiReceiver.gotData[str] and update_chat()
     window.show()
     sys.exit(app.exec_())
