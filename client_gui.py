@@ -53,10 +53,12 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             print(e)
 
+
 class AllButton:
     """ Общий класс кнопки для работы со списком контактов """
     def __init__(self, window):
         self.window = window
+
 
 class ButtonAddContact(AllButton):
     def on_clicked(self):
@@ -97,14 +99,14 @@ class ButtonDelContact(AllButton):
 
 class ButtonSend(AllButton):
     def on_clicked(self):
-        text = window.plainTextEditMsg.toPlainText()
+        text = self.window.plainTextEditMsg.toPlainText()
         if text:
             try:
-                contact_name = window.listWidgetContact.currentItem().text()
+                contact_name = self.window.listWidgetContact.currentItem().text()
                 self.window.client.message_send(contact_name, text)
-                window.plainTextEditMsg.clear()
+                self.window.plainTextEditMsg.clear()
                 msg = '>> {}: {}'.format(self.window.client.login, text)
-                window.listWidgetChat.addItem(msg)
+                self.window.listWidgetChat.addItem(msg)
             except Exception as e:
                 print(e)
 
