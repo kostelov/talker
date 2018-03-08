@@ -79,7 +79,7 @@ class GuiReceiver(Receiver, QObject):
         QObject.__init__(self)
 
     def process_message(self, message):
-        text = '{} >> {}'.format(message[USER], message[MESSAGE])
+        text = '    >> {}: {}'.format(message[USER], message[MESSAGE])
         print(text)
         self.gotData.emit(text)
 
