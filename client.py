@@ -55,8 +55,8 @@ class User:
     def get_contacts(self):
         msg = JimGetContacts(self.login)
         send_message(self.sock, msg.to_dict())
-        # response = get_message(self.sock)
-        response = self.receiver_queue.get()
+        response = get_message(self.sock)
+        # response = self.receiver_queue.get()
         return response[MESSAGE]
 
     def add_contact(self, contact_name):
