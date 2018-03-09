@@ -76,16 +76,21 @@ class Handler:
         :param all_clientts: список всех клиентов
         :return: None
         """
-        # for sock in w_clients:
         for msg, sock in messages:
             try:
                 # Получаем словарь
                 jmsg = Jim.from_dict(msg)
                 if jmsg[ACTION] == MSG:
                     to = jmsg[TO]
-                    # Достаем из словаря сокет по имени клиента
-                    contact_sock = names[to]
-                    send_message(contact_sock, msg)
+                    # Проверяем подключен ли адресат
+                    if to in names:
+                        # Достаем из словаря сокет по имени клиента
+                        contact_sock = names[to]
+                        send_message(contact_sock, msg)
+                    else:
+                        # Если контакт offline шлем ответ сервера
+                        resp = JimResponse(GONE, error='{} не в сети'.format(to))
+                        send_message(sock, resp.to_dict())
                 elif jmsg[ACTION] == GET_CONTACTS:
                     # Извлекаем имя пользователя и передаем в запрос
                     contacts = self.repo.get_contacts(jmsg[USER])

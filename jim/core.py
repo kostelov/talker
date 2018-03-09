@@ -54,18 +54,18 @@ class JimResponse(Jim):
 
     def to_dict(self):
         message = super().to_dict()
-        if self.response == BASIC_NOTICE or self.response == OK or self.response == ACCEPTED:
+        if self.response in CODES:
             message[ACTION] = RESPONSE
             message[TIME] = nix_time.time()
             message[CODE] = self.response
             message[MESSAGE] = self.error
             return message
-        elif self.response == WRONG_REQUEST or self.response == SERVER_ERROR:
-            message[ACTION] = RESPONSE
-            message[TIME] = nix_time.time()
-            message[CODE] = self.response
-            message[MESSAGE] = self.error
-            return message
+        # elif self.response in CODES:
+        #     message[ACTION] = RESPONSE
+        #     message[TIME] = nix_time.time()
+        #     message[CODE] = self.response
+        #     message[MESSAGE] = self.error
+        #     return message
 
 
 class JimPresence(Jim):

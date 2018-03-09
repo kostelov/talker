@@ -48,7 +48,7 @@ class Receiver:
                 break
             # Получаем ответ сервера
             data = get_message(self.sock)
-            if data[ACTION] == RESPONSE :
+            if data[ACTION] == RESPONSE and data[CODE] != GONE:
                 self.receiver_queue.put(data)
             else:
                 self.process_message(data)
@@ -79,8 +79,11 @@ class GuiReceiver(Receiver, QObject):
         QObject.__init__(self)
 
     def process_message(self, message):
-        text = '    >> {}: {}'.format(message[USER], message[MESSAGE])
-        print(text)
+        if message[USER] is None:
+            message[USER] = 'Server'
+            text = '    >> {}: {}'.format(message[USER], message[MESSAGE])
+        else:
+            text = '    >> {}: {}'.format(message[USER], message[MESSAGE])
         self.gotData.emit(text)
 
     def pull(self):
