@@ -1,6 +1,10 @@
 from jim.event import get_message, send_message
 from jim.config import *
 from PyQt5.QtCore import QObject, pyqtSignal
+from datetime import datetime
+from history.history_config import HistoryFrom
+
+history = HistoryFrom()
 
 
 class Sender:
@@ -79,13 +83,15 @@ class GuiReceiver(Receiver, QObject):
         QObject.__init__(self)
 
     def process_message(self, message):
-        if message[USER] is None:
-            message[USER] = 'Server'
-            text = '    >> {}: {}'.format(message[USER], message[MESSAGE])
-        else:
-            text = '    >> {}: {}'.format(message[USER], message[MESSAGE])
+        tm = datetime.fromtimestamp(message[TIME]).strftime('%X')
+        text = '{} {}:\n{}'.format(tm, message[USER], message[MESSAGE])
+        self.add_to_history(message)
         self.gotData.emit(text)
 
     def pull(self):
         super().pull()
         self.finished.emit(0)
+
+    @history
+    def add_to_history(self, msg):
+        return msg

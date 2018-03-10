@@ -60,12 +60,6 @@ class JimResponse(Jim):
             message[CODE] = self.response
             message[MESSAGE] = self.error
             return message
-        # elif self.response in CODES:
-        #     message[ACTION] = RESPONSE
-        #     message[TIME] = nix_time.time()
-        #     message[CODE] = self.response
-        #     message[MESSAGE] = self.error
-        #     return message
 
 
 class JimPresence(Jim):
