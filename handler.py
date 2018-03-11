@@ -84,7 +84,9 @@ class GuiReceiver(Receiver, QObject):
 
     def process_message(self, message):
         tm = datetime.fromtimestamp(message[TIME]).strftime('%X')
-        text = '{} {}:\n{}'.format(tm, message[USER], message[MESSAGE])
+        if message[USER] is None:
+            message[USER] = 'Server'
+        text = '{} {}: {}'.format(tm, message[USER], message[MESSAGE])
         self.add_to_history(message)
         self.gotData.emit(text)
 

@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal, Qt, QEvent
 import sys
 import os
 from datetime import datetime
@@ -77,6 +77,11 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             print(e)
 
+    def keyPressEvent(self, e):
+        # Отправка сообщения по нажатию Enter, но только когда MainWindow в фокусе
+        if e.key() == Qt.Key_Enter or e.key() == Qt.Key_Return:
+            btn_send.on_clicked()
+
 
 class AllButton:
     """ Общий класс кнопки для работы со списком контактов """
@@ -134,7 +139,7 @@ class ButtonSend(AllButton):
                 self.window.plainTextEditMsg.clear()
                 # nix_time.strftime('%X', nix_time.localtime()), self.window.client.login, text)
                 tm = datetime.fromtimestamp(msg[TIME]).strftime('%X')
-                text = '{} {}:\n{}'.format(tm, msg[USER], msg[MESSAGE])
+                text = '{} {}: {}'.format(tm, msg[USER], msg[MESSAGE])
                 self.window.listWidgetChat.addItem(text)
                 self.add_to_history(msg)
             except Exception as e:
