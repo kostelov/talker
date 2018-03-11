@@ -19,10 +19,10 @@ class User:
     def __init__(self, login, addr=None, port=None):
         self.login = login
         if not addr:
-            host = 'localhost'
+            addr = 'localhost'
         if not port:
             port = 7777
-        self.host = (host, port)
+        self.host = (addr, port)
         self.receiver_queue = Queue()
         self.sender_queue = Queue()
 

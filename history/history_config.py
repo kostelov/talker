@@ -7,11 +7,14 @@ import os
 from jim.config import *
 from datetime import datetime
 
+# Получаем директорию, в которой будет лежать файл истории
+HISTORY_FOLDER_PATH = os.path.dirname(os.path.abspath(__file__))
+
 
 class History:
     def __init__(self):
         # Получаем директорию, в которой будет лежать файл истории
-        self.history_folder_path = os.path.dirname(os.path.abspath(__file__))
+        self.history_folder_path = HISTORY_FOLDER_PATH
 
 
 class HistoryTo(History):

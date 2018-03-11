@@ -1,16 +1,17 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal
 import sys
+import os
 from datetime import datetime
 from client import User
 from jim.config import *
 from handler import GuiReceiver
-from history.history_config import HistoryTo
+from history.history_config import HistoryTo, HISTORY_FOLDER_PATH
 
 history = HistoryTo()
 
 class DialogWindow(QtWidgets.QDialog):
-
+    """ Будем принимать сигнал от диалогового окна авторизации"""
     login = pyqtSignal(str)
 
     def __init__(self, parent=None):
@@ -21,17 +22,22 @@ class DialogWindow(QtWidgets.QDialog):
         self.pushButtonCancel.clicked.connect(self.click_cancel)
 
     def click_ok(self):
-        # Забираем логин и закрываем окно авторизации
+        # Забираем логин, ip-адрес, порт и закрываем окно авторизации
         text = self.lineEditLogin.text()
+        host = self.lineEditHost.text()
+        port = self.lineEditPort.text()
+        data = '{} {} {}'.format(text, host, port)
         if text:
             self.lineEditLogin.clear()
-            self.login.emit(text)
+            # Вызываем сигнал
+            self.login.emit(data)
             self.close()
         else:
             print('Укажите логин')
 
     def click_cancel(self):
-        self.login.emit(None)
+        data = '{} {} {}'.format(None, '127.0.0.1', 7777)
+        self.login.emit(data)
         self.close()
 
 
@@ -43,9 +49,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.client = ''
 
     @pyqtSlot(str)
-    def get_login(self, username):
+    def get_login(self, data):
+        username = data.split()[0]
+        ip = data.split()[1]
+        port = int(data.split()[2])
         if username:
-            self.client = User(username)
+            self.client = User(username, ip, port)
             self.client.start()
             self.setWindowTitle('Talker - {}'.format(username))
             # Получаем список контактов для авторизованного пользователя
@@ -58,6 +67,7 @@ class MainWindow(QtWidgets.QMainWindow):
             sys.exit()
 
     def make_window(self, login_object):
+        # Связываем объект окно авторизации с функцией основного окна
         login_object.login.connect(self.get_login)
 
     @pyqtSlot(str)
@@ -70,8 +80,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
 class AllButton:
     """ Общий класс кнопки для работы со списком контактов """
-    def __init__(self, window):
-        self.window = window
+    def __init__(self, main_window):
+        self.window = main_window
 
 
 class ButtonAddContact(AllButton):
@@ -120,18 +130,13 @@ class ButtonSend(AllButton):
         if text:
             try:
                 contact_name = self.window.listWidgetContact.currentItem().text()
-                # Формируем имя для файла истории
-                # self.history_file_name = 'inf_{}.his'.format(contact_name)
                 msg = self.window.client.message_send(contact_name, text)
                 self.window.plainTextEditMsg.clear()
-                # nix_time.strftime('%X', nix_time.localtime()), self.window.client.login, text
+                # nix_time.strftime('%X', nix_time.localtime()), self.window.client.login, text)
                 tm = datetime.fromtimestamp(msg[TIME]).strftime('%X')
-                text = '{} {}:\n{}\n'.format(tm, msg[USER], msg[MESSAGE])
+                text = '{} {}:\n{}'.format(tm, msg[USER], msg[MESSAGE])
                 self.window.listWidgetChat.addItem(text)
                 self.add_to_history(msg)
-                # full_name_history_file = os.path.join(HISTORY_FOLDERS_PATH, self.history_file_name)
-                # with open(full_name_history_file, 'a', encoding='utf-8') as hfile:
-                #     hfile.write(msg)
             except Exception as e:
                 print(e)
 
@@ -139,14 +144,29 @@ class ButtonSend(AllButton):
     def add_to_history(self, msg):
         return msg
 
+
 class ChatEvent:
-    """ Действие при выборе другой даписи в списке контактов """
-    def __init__(self, window):
-        self.window = window
+    """ Действие при выборе другой записи в списке контактов """
+    def __init__(self, main_window):
+        self.window = main_window
 
     def change_contact(self):
+        """ При выборе контакта из списка, подгружаем историю переписки"""
         self.window.listWidgetChat.clear()
-        # contact_name = self.window.listWidgetContact.currentItem().text()
+        contact_name = self.window.listWidgetContact.currentItem().text()
+        history_file_name = 'inf_{}.his'.format(contact_name)
+        full_name_history_file = os.path.join(HISTORY_FOLDER_PATH, history_file_name)
+        # Получаем дату файла истории. Нет смысла использовать, т.к. дата меняется при перезаписи файла
+        # current_file_date = datetime.fromtimestamp(os.path.getmtime(full_name_history_file)).date()
+        # Проверяем существует ли файл истории
+        if os.path.exists(full_name_history_file):
+            # self.window.listWidgetChat.addItem(str(current_file_date))
+            with open(full_name_history_file, 'r', encoding='utf-8') as hfile:
+                for line in hfile:
+                    self.window.listWidgetChat.addItem(line.rstrip())
+        else:
+            # Если файла истории нет, ничего не делать
+            pass
 
 
 if __name__ == '__main__':
