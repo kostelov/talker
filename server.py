@@ -61,18 +61,17 @@ class Handler:
             try:
                 msg = get_message(sock)
                 messages.append((msg, sock))
-                # requests[sock] = msg
             except:
                 print('Клиент {} {} отключился'.format(sock.fileno(), sock.getpeername()))
                 all_clients.remove(sock)
-        return messages # requests
+        return messages
 
     @logg
     def response(self, messages, names, all_clients):
         """
         Эхо-ответ сервера клиентам, от которых были запросы
-        :param requests: {сокет: запрос}
-        :param w_clients: список клиентов, которые ожидают ответа
+        :param messages: {сокет: запрос}
+        :param names: список клиентов и их сокетов, которые ожидают ответа
         :param all_clientts: список всех клиентов
         :return: None
         """
@@ -143,7 +142,7 @@ class Server:
         """
         Данные хоста:
         :param address: адрес, на который отправляют запрос клиенты (localhost))
-        :param port: порт, на которым сервер принимает запросы (7777)
+        :param port: порт, на котором сервер принимает запросы (7777)
         :return:
         """
         self.handler = handler

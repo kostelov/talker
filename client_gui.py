@@ -1,5 +1,5 @@
-from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal, Qt, QEvent
+from PyQt5 import QtWidgets, uic, QtGui
+from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal, Qt, QRect
 import sys
 import os
 from datetime import datetime
@@ -9,6 +9,17 @@ from handler import GuiReceiver
 from history.history_config import HistoryTo, HISTORY_FOLDER_PATH
 
 history = HistoryTo()
+
+
+class PlainText(QtWidgets.QPlainTextEdit):
+    """ Класс для поля ввода сообщения, пересоздаем чтобы делать перехвать нажатия клавиш """
+    def keyPressEvent(self, e):
+        # Отправка сообщения по нажатию Ctrl + Enter, Return или Enter цифровой клавиатуры
+        # При использовании клавиши Return сообщение отправляется и каретка переносится на новую строку
+        if e.key() == Qt.Key_Enter or e.key() == Qt.Key_Return:
+            btn_send.on_clicked()
+        return QtWidgets.QPlainTextEdit.keyPressEvent(self, e)
+
 
 class DialogWindow(QtWidgets.QDialog):
     """ Будем принимать сигнал от диалогового окна авторизации"""
@@ -47,6 +58,14 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QWidget.__init__(self, parent)
         uic.loadUi('main.ui', self)
         self.client = ''
+        # Рисуем поле для ввода сообщения
+        self.plainTextEditMsg = PlainText(self)
+        self.plainTextEditMsg.setGeometry(QRect(210, 340, 330, 61))
+        font = QtGui.QFont()
+        font.setFamily("Courier")
+        font.setPointSize(10)
+        self.plainTextEditMsg.setFont(font)
+        self.plainTextEditMsg.setObjectName("plainTextEditMsg")
 
     @pyqtSlot(str)
     def get_login(self, data):
@@ -76,11 +95,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.listWidgetChat.addItem(text)
         except Exception as e:
             print(e)
-
-    def keyPressEvent(self, e):
-        # Отправка сообщения по нажатию Enter, но только когда MainWindow в фокусе
-        if e.key() == Qt.Key_Enter or e.key() == Qt.Key_Return:
-            btn_send.on_clicked()
 
 
 class AllButton:

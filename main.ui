@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>605</width>
     <height>425</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
+    <width>605</width>
     <height>425</height>
    </size>
   </property>
@@ -172,6 +172,9 @@ alternate-background-color: rgb(243, 243, 243);</string>
     <property name="frameShadow">
      <enum>QFrame::Sunken</enum>
     </property>
+    <property name="defaultDropAction">
+     <enum>Qt::IgnoreAction</enum>
+    </property>
     <property name="alternatingRowColors">
      <bool>true</bool>
     </property>
@@ -179,30 +182,20 @@ alternate-background-color: rgb(243, 243, 243);</string>
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QPlainTextEdit" name="plainTextEditMsg">
-    <property name="geometry">
-     <rect>
-      <x>210</x>
-      <y>340</y>
-      <width>380</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Courier</family>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButtonSend">
     <property name="geometry">
      <rect>
-      <x>540</x>
-      <y>350</y>
-      <width>41</width>
-      <height>41</height>
+      <x>539</x>
+      <y>340</y>
+      <width>51</width>
+      <height>61</height>
      </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string/>
@@ -227,7 +220,7 @@ alternate-background-color: rgb(243, 243, 243);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>605</width>
      <height>21</height>
     </rect>
    </property>
